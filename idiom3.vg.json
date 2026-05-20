@@ -1,0 +1,78 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Temporal Patronage and Commuter Mode Shift Dashboard",
+  "background": "#f9f9f9",
+
+  "title": {
+    "text": "Melbourne Peak Hour Patronage Waves",
+    "subtitle": "Aggregated average weekday station entries distributed across time bands",
+    "subtitleColor": "#666666",
+    "subtitleFontStyle": "italic"
+  },
+  "width": 500,
+  "height": 400,
+  "data": {
+    "url": "data/annual_metropolitan_train_station_entries_fy_2024_2025.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "Pax_pre_AM_peak": "number",
+        "Pax_AM_peak": "number",
+        "Pax_interpeak": "number",
+        "Pax_PM_peak": "number",
+        "Pax_PM_late": "number"
+      }
+    }
+  },
+  "transform": [
+    {
+      "fold": [
+        "Pax_pre_AM_peak",
+        "Pax_AM_peak",
+        "Pax_interpeak",
+        "Pax_PM_peak",
+        "Pax_PM_late"
+      ],
+      "as": ["Raw_Band", "Volume"]
+    },
+    {
+      "calculate": "datum.Raw_Band == 'Pax_pre_AM_peak' ? '1. Pre-AM (12am-7am)' : datum.Raw_Band == 'Pax_AM_peak' ? '2. AM Peak (7am-9:30am)' : datum.Raw_Band == 'Pax_interpeak' ? '3. Interpeak (9:30am-3pm)' : datum.Raw_Band == 'Pax_PM_peak' ? '4. PM Peak (3pm-7pm)' : '5. PM Late (7pm-12am)'",
+      "as": "Time_Label"
+    }
+  ],
+  "mark": {
+    "type": "area",
+    "interpolate": "monotone",
+    "line": {"color": "#1f77b4"}, 
+    "fill": "#1f77b4",       
+    "opacity": 0.6             
+  },
+  "encoding": {
+    "x": {
+      "field": "Time_Label",
+      "type": "nominal",
+      "title": "Time of Day",
+      "axis": {
+        "labelAngle": -15,
+        "labelOverlap": false,
+        "labelFontSize": 11
+      }
+    },
+    "y": {
+      "aggregate": "sum",
+      "field": "Volume",
+      "type": "quantitative",
+      "title": "Total Passenger Volume (Entries)",
+      "axis": {
+        "format": "s",
+        "titlePadding": 10
+      }
+    },
+    
+    "tooltip": [
+      {"field": "Time_Label", "type": "nominal", "title": "Time Period"},
+      {"aggregate": "sum", "field": "Volume", "type": "quantitative", "title": "Total Volume", "format": ","}
+    ]
+  }
+
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Idiom 5: Cycling Flow vs. Path Availability",
+    "subtitle": "Evaluating if continuous, unbroken infrastructure triggers higher daily cycling adoption",
+    "subtitleColor": "#666666",
+    "subtitleFontStyle": "italic"
+  },
+  "width": 650,
+  "height": 450,
+  "background": "#f9f9f9",
+  "data": {
+    "url": "data/cycling_flow_continuous_paths.csv"
+  },
+  "params": [
+    {
+      "name": "path_selector",
+      "select": {"type": "point", "fields": ["Path_Type"]},
+      "bind": "legend"
+    }
+  ],
+  "mark": {
+    "type": "circle",
+    "size": 80,
+    "stroke": "#ffffff",
+    "strokeWidth": 0.5,
+    "opacity": 0.8
+  },
+  "encoding": {
+    "x": {
+      "field": "Avg_Daily_Volume",
+      "type": "quantitative",
+      "title": "Average Daily Cyclist Volume",
+      "axis": {"grid": false}
+    },
+    "y": {
+      "field": "Continuous_Length_m",
+      "type": "quantitative",
+      "title": "Continuous Unbroken Path Length (meters)",
+      "scale": {"type": "log"}, 
+      "axis": {"gridDash": [4, 4]}
+    },
+    "color": {
+      "field": "Path_Type",
+      "type": "nominal",
+      "title": "Infrastructure Classification",
+      "scale": {"scheme": "category10"}
+    },
+    "opacity": {
+      "condition": {"param": "path_selector", "value": 0.8},
+      "value": 0.1
+    },
+    "tooltip": [
+      {"field": "SITE_XN_ROUTE", "type": "nominal", "title": "Counter Site ID"},
+      {"field": "Path_Name", "type": "nominal", "title": "Path Name"},
+      {"field": "Path_Type", "type": "nominal", "title": "Infrastructure Type"},
+      {"field": "Avg_Daily_Volume", "type": "quantitative", "title": "Avg. Daily Flow", "format": ","},
+      {"field": "Avg_Weekday_Volume", "type": "quantitative", "title": "Avg. Weekday Flow", "format": ","},
+      {"field": "Avg_Weekend_Volume", "type": "quantitative", "title": "Avg. Weekend Flow", "format": ","},
+      {"field": "Continuous_Length_m", "type": "quantitative", "title": "Total Continuous Length (m)", "format": ",.0f"}
+    ]
+  }
+}

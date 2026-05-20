@@ -1,0 +1,86 @@
+SITE_XN_ROUTE,Avg_Daily_Volume,Avg_Weekday_Volume,Avg_Weekend_Volume,Path_Name,Path_Type,Continuous_Length_m,Distance_To_Path_m
+6411,10004,10004,0,St Georges Road Trail,Shared use path (off-road),793.3,18.3
+6411,10004,10004,0,St Georges Road Trail,Shared use path (off-road),793.3,12.8
+6415,10615,10615,0,Main Yarra Trail Capital City Trail,Shared use path (off-road),405.7,1.5
+6415,10615,10615,0,Main Yarra Trail Capital City Trail,Shared use path (off-road),405.7,2.2
+6419,6178,5785,13660,Merri Creek Trail,Shared use path (off-road),678.4,1.9
+6419,6178,5785,13660,Merri Creek Trail,Shared use path (off-road),678.4,2.8
+6423,592,592,0,Federation Trail,Shared use path (off-road),969.2,1.4
+6423,592,592,0,Federation Trail,Shared use path (off-road),969.2,0.3
+6592,10310,10310,0,Capital City Trail,Shared use path (off-road),273.4,2.5
+6592,10310,10310,0,Capital City Trail,Shared use path (off-road),273.4,2.2
+6596,8949,8949,0,Bay Trail,Separated path (off-road),232.7,1.0
+6596,8949,8949,0,Bay Trail,Separated path (off-road),232.7,1.2
+6600,1487,1487,0,Scotchmans Creek Trail,Shared use path (off-road),1234.2,1.6
+6600,1487,1487,0,Scotchmans Creek Trail,Shared use path (off-road),1234.2,1.5
+7584,3527,3527,0,Koonung Creek Trail,Shared use path (off-road),104.6,1.5
+7584,3527,3527,0,Koonung Creek Trail,Shared use path (off-road),104.6,1.2
+7588,10595,10595,0,Capital City Trail,Shared use path (off-road),231.2,0.6
+7588,10595,10595,0,Unnamed Path,Shared use path (off-road),286.9,0.3
+7592,786,786,0,Anniversary Outer Circle Trail,Shared use path (off-road),502.0,31.0
+7592,786,786,0,Anniversary Outer Circle Trail,Shared use path (off-road),502.0,29.9
+7596,4069,4069,0,Moreland Street,Basic painted lane,62.8,3.7
+7596,4069,4069,0,Moreland Street,Basic painted lane,62.8,3.8
+7600,2804,2804,0,Napier Street,Basic painted lane,29.0,2.8
+7600,2804,2804,0,Napier Street,Basic painted lane,29.0,2.8
+7604,4257,4257,0,Main Yarra Trail,Shared use path (off-road),390.5,1.6
+7604,4257,4257,0,Main Yarra Trail,Shared use path (off-road),390.5,1.6
+8172,3575,3575,0,Main Yarra Trail Capital City Trail,Shared use path (off-road),863.8,0.8
+8172,3575,3575,0,Main Yarra Trail Capital City Trail,Shared use path (off-road),863.8,0.8
+8176,8116,8116,0,Main Yarra Trail,Shared use path (off-road),3421.0,1.4
+8176,8116,8116,0,Main Yarra Trail,Shared use path (off-road),3421.0,0.8
+8180,8339,8339,0,Upfield Shared Path,Shared use path (off-road),603.8,0.2
+8180,8339,8339,0,Upfield Shared Path,Shared use path (off-road),603.8,0.2
+8184,12075,12075,0,Gardiners Creek Trail,Shared use path (off-road),176.8,2.4
+8184,12075,12075,0,Gardiners Creek Trail,Shared use path (off-road),176.8,3.1
+8188,2354,2354,0,St Georges Road Trail,Shared use path (off-road),830.0,2.1
+8188,2354,2354,0,St Georges Road Trail,Shared use path (off-road),830.0,2.0
+8192,5798,5798,0,Gardiners Creek Trail,Shared use path (off-road),279.9,2.2
+8192,5798,5798,0,Gardiners Creek Trail,Shared use path (off-road),279.9,2.1
+8196,478,478,0,Western Port Bay Trail,Shared use path (off-road),5656.4,16569.6
+8196,478,478,0,Western Port Bay Trail,Shared use path (off-road),5656.4,16572.1
+9077,3619,3619,0,Albert Street,Protected bike lane (on-road),106.7,5.4
+9077,3619,3619,0,Albert Street,Protected bike lane (on-road),106.7,5.4
+9079,1412,1412,0,Unnamed Path,Shared use path (off-road),69.9,0.7
+9079,1412,1412,0,Unnamed Path,Shared use path (off-road),69.9,0.7
+9999,8536,8536,0,Unnamed Path,Protected bike lane (on-road),38.1,0.6
+9999,8536,8536,0,St Kilda Road,Protected bike lane (on-road),997.5,23.1
+10223,2146,2146,0,Anniversary Trail,Shared use path (off-road),433.3,0.1
+10223,2146,2146,0,Anniversary Trail,Shared use path (off-road),433.3,0.1
+10225,2215,2215,0,Unnamed Path,Shared use path (off-road),11.0,6.5
+10225,2215,2215,0,Flemington Road,Basic painted lane,19.4,10.7
+10484,8259,8259,0,Unnamed Path,Shared use path (off-road),16.6,18.3
+10484,8259,8259,0,Woodgate Street,Shared street (sharrows),9.1,18.3
+10484,8259,8259,0,Unnamed Path,Shared use path (off-road),16.6,14.0
+10484,8259,8259,0,Woodgate Street,Shared street (sharrows),9.1,14.0
+10486,6065,6065,0,Royal Parade,Basic painted lane,56.7,15.9
+10486,6065,6065,0,Royal Parade,Basic painted lane,56.7,15.9
+10488,1216,1216,0,Brighton Road,Basic painted lane,171.7,17.1
+10488,1216,1216,0,St Kilda Road,Basic painted lane,24.4,5.1
+31602,1366,1366,0,Unnamed Path,Shared use path (off-road),528.8,0.3
+31602,1366,1366,0,Unnamed Path,Shared use path (off-road),528.8,0.3
+31747,401,401,0,Box Hill to Ringwood Trail,Shared use path (off-road),901.6,30.4
+31747,401,401,0,Box Hill to Ringwood Trail,Shared use path (off-road),901.6,30.7
+32493,3427,3427,0,Unnamed Path,Protected bike lane (on-road),419.1,5.9
+32493,3427,3427,0,Unnamed Path,Protected bike lane (on-road),1097.7,6.2
+32612,2717,2717,0,Bay Trail,Shared use path (off-road),4747.3,0.7
+32612,2717,2717,0,Bay Trail,Shared use path (off-road),4747.3,0.7
+32615,5932,5932,0,Bay Trail,Separated path (off-road),483.0,6.1
+32615,5932,5932,0,Bay Trail,Separated path (off-road),483.0,6.1
+32616,1370,1370,0,Bay Trail,Shared use path (off-road),1900.3,0.9
+32616,1370,1370,0,Bay Trail,Shared use path (off-road),1900.3,0.9
+33179,11285,11285,0,Capital City Trail Moonee Ponds Creek Trail,Shared use path (off-road),11.2,0.8
+33179,11285,11285,0,Capital City Trail Moonee Ponds Creek Trail,Shared use path (off-road),11.2,0.5
+34215,1836,1836,0,South Crescent,Shared street (sharrows),8.4,1.1
+34215,1836,1836,0,South Crescent,Shared street (sharrows),8.4,1.1
+34216,630,630,0,Woolhouse Street,Shared street (sharrows),17.0,0.7
+34216,630,630,0,Woolhouse Street,Shared street (sharrows),17.0,0.7
+34217,382,382,0,Christmas Street,Shared street (sharrows),252.6,0.4
+34217,382,382,0,Christmas Street,Shared street (sharrows),252.6,0.4
+34271,848,848,0,Moreland Street,Basic painted lane,62.8,3.8
+34314,5067,5067,0,Canning Street,Basic painted lane,140.3,6.5
+34314,5067,5067,0,Canning Street,Basic painted lane,140.3,6.5
+34315,3049,3049,0,Darebin Creek Trail,Shared use path (off-road),118.4,1.1
+34315,3049,3049,0,Darebin Creek Trail,Shared use path (off-road),118.4,1.1
+34556,981,981,0,Federation Trail,Shared use path (off-road),1251.4,1.6
+34556,981,981,0,Federation Trail,Shared use path (off-road),1251.4,1.6

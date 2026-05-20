@@ -1,0 +1,70 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Idiom 6: Commuter Rush Speed Ranges",
+    "subtitle": "Distribution of bicycle speeds across top collection sites during peak hours",
+    "subtitleColor": "#666666",
+    "subtitleFontStyle": "italic"
+  },
+  "width": 700,
+  "height": 400,
+  "background": "#f9f9f9",
+  "data": {
+    "url": "data/commuter_speeds_sampled.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "SPEED": "number"
+      }
+    }
+  },
+  "mark": {
+    "type": "boxplot",
+    "extent": "min-max", 
+    "ticks": true,
+    "median": {"color": "white", "strokeWidth": 2},
+    "outliers": {"size": 10, "opacity": 0.2}
+  },
+  "encoding": {
+    "x": {
+      "field": "SITE_XN_ROUTE",
+      "type": "nominal",
+      "title": "Top Counter Locations (Site ID)",
+      "axis": {
+        "labelAngle": 0,
+        "labelFontSize": 12
+      }
+    },
+    "xOffset": {
+      "field": "Time_Window",
+      "type": "nominal"
+    },
+    "y": {
+      "field": "SPEED",
+      "type": "quantitative",
+      "title": "Recorded Speed (km/h)",
+      "scale": {"zero": true},
+      "axis": {"grid": true}
+    },
+    "color": {
+      "field": "Time_Window",
+      "type": "nominal",
+      "title": "Peak Period",
+      "scale": {
+        "domain": ["AM Peak", "PM Peak"],
+        "range": ["#1f77b4", "#ff7f0e"] 
+      },
+      "legend": {
+        "orient": "top-right",
+        "fillColor": "#ffffff",
+        "padding": 10,
+        "cornerRadius": 5,
+        "strokeColor": "#e0e0e0"
+      }
+    },
+    "tooltip": [
+      {"field": "SITE_XN_ROUTE", "type": "nominal", "title": "Site ID"},
+      {"field": "Time_Window", "type": "nominal", "title": "Peak Window"}
+    ]
+  }
+}

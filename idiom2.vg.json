@@ -1,0 +1,79 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Train Station Entry Volume Grid",
+  "background": "#f9f9f9",
+  "title": {
+    "text": "Idiom 2: Train Station Entry Volume Grid",
+    "subtitle": "Annual station entry volume mapped via proportional symbol channels",
+    "subtitleColor": "#666666",
+    "subtitleFontStyle": "italic"
+  },
+  "width": 500,
+  "height": 500,
+  "projection": {
+    "type": "mercator",
+    "center": [145, -37.86],
+    "scale": 38000
+  },
+  "layer": [
+    {
+      "description": "Choropleth Reference Base Context for Symbols",
+      "data": {
+        "url": "data/SA3_2016_AUST.json",
+        "format": {"type": "topojson", "feature": "SA3_2016_AUST"}
+      },
+      "mark": {
+        "type": "geoshape",
+        "fill": "#eaeaea",
+        "stroke": "#ffffff",
+        "strokeWidth": 0.5
+      }
+    },
+    {
+      "description": "Proportional Symbol Map Layer mapping CSV Coordinates",
+      "data": {
+        "url": "data/annual_metropolitan_train_station_entries_fy_2024_2025.csv",
+        "format": {"type": "csv"}
+      },
+      "mark": {
+        "type": "circle",
+        "stroke": "#333333",
+        "strokeWidth": 0.8,
+        "opacity": 0.85
+      },
+      "encoding": {
+        "longitude": {
+          "field": "Stop_long",
+          "type": "quantitative"
+        },
+        "latitude": {
+          "field": "Stop_lat",
+          "type": "quantitative"
+        },
+        "size": {
+          "field": "Pax_annual",
+          "type": "quantitative",
+          "scale": {
+            "range": [20, 600]
+          },
+          "title": "Annual Volume"
+        },
+        "color": {
+          "field": "Pax_annual",
+          "type": "quantitative",
+          "scale": {
+            "scheme": "blues"
+          },
+          "title": "Crowding Intensity"
+        },
+        "tooltip": [
+          {"field": "Stop_name", "type": "nominal", "title": "Station"},
+          {"field": "Pax_annual", "type": "quantitative", "title": "Annual Patronage", "format": ","},
+          {"field": "Pax_weekday", "type": "quantitative", "title": "Avg Weekday", "format": ","},
+          {"field": "Pax_AM_peak", "type": "quantitative", "title": "AM Peak Volume", "format": ","},
+          {"field": "Pax_PM_peak", "type": "quantitative", "title": "PM Peak Volume", "format": ","}
+        ]
+      }
+    }
+  ]
+}

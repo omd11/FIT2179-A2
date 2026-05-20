@@ -1,0 +1,100 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Bimodal Transport Network Layer",
+  "background": "#f9f9f9",
+  "title": {
+    "text": "Bimodal Transport Network Layer",
+    "subtitle": "Active cycling paths and train networks across Greater Melbourne",
+    "subtitleColor": "#666666",
+    "subtitleFontStyle": "italic"
+  },
+  "width": 500,
+  "height": 500,
+  "projection": {
+    "type": "mercator",
+    "center": [145, -37.86],
+    "scale": 38000
+  },
+  "layer": [
+    {
+      "description": "LAYER 0: Victorian Regional/LGA Basemap Container",
+      "data": {
+        "url": "data/SA3_2016_AUST.json",
+        "format": {"type": "topojson", "feature": "SA3_2016_AUST"}
+      },
+      "mark": {
+        "type": "geoshape",
+        "fill": "#ddd",
+        "stroke": "#bcbfca",
+        "strokeWidth": 1
+      },
+      "encoding": {
+        "tooltip": [
+          {"field": "properties.SA3_NAME16", "type": "nominal", "title": "Region"}
+        ]
+      }
+    },
+    {
+      "description": "Layer 1: Bicycle Infrastructure Network (Base Network)",
+      "data": {
+        "url": "data/bicycle_infrastructure_network.topojson",
+        "format": {"type": "topojson", "feature": "bicycle_infrastructure_network"}
+      },
+      "mark": {
+        "type": "geoshape",
+        "stroke": "#2ca02c", 
+        "strokeWidth": 1.2,
+        "opacity": 0.5,
+        "fill": "transparent" 
+      },
+      "encoding": {
+        "tooltip": [
+          {"field": "properties.HwyType", "type": "nominal", "title": "Cycle Path"}
+        ]
+      }
+    },
+    {
+      "description": "Layer 2: Public Transport LINES",
+      "data": {
+        "url": "data/public_transport_lines.json",
+        "format": {"type": "json", "property": "features"}
+      },
+      "mark": {
+        "type": "geoshape",
+        "stroke": "#1f77b4", 
+        "strokeWidth": 2.5,
+        "opacity": 0.8,
+        "fill": "transparent" 
+      },
+      "encoding": {
+        "tooltip": [
+          {"field": "properties.LONG_NAME", "type": "nominal", "title": "Transit Route"}
+        ]
+      }
+    },
+    {
+      "description": "Layer 3: Public Transport STOPS (Placed on top)",
+      "data": {
+        "url": "data/public_transport_stops.geojson",
+        "format": {"type": "json", "property": "features"}
+      },
+      "transform": [
+        {
+          "filter": "datum.properties.MODE == 'METRO TRAIN' || datum.properties.ROUTE_TYPE == 2"
+        }
+      ],
+      "mark": {
+        "type": "geoshape",
+        "fill": "#1f77b4", 
+        "stroke": "#ffffff", 
+        "strokeWidth": 0.3,
+        "size": 0.00002
+      },
+      "encoding": {
+        "tooltip": [
+          {"field": "properties.STOP_NAME", "type": "nominal", "title": "Station/Stop"}
+        ]
+      }
+    }
+  ]
+}
