@@ -1,0 +1,225 @@
+---
+title: "Untitled"
+format: pdf
+editor: visual
+---
+
+```{r}
+
+# Install required packages if you haven't already:
+# install.packages(c("tidyverse", "lubridate"))
+
+library(tidyverse)
+library(lubridate)
+
+# ---------------------------------------------------------
+# CONFIGURATION
+# ---------------------------------------------------------
+zip_folder <- "data/bicycle_volume_speed_2024"         # Folder containing all the .zip files
+output_csv <- "data/idiom8_calendar_heatmap.csv" # Output file for Vega-Lite
+
+# Consistency Threshold: 
+# A value of 0.95 means a site must have logged data on at least 95% 
+# of the total days in the timeline to be included. (This accounts for 
+# a few genuine 0-volume days or brief hardware maintenance).
+consistency_threshold <- 0.95 
+
+# --- 2. FILE DISCOVERY ---
+zip_files <- list.files(zip_folder, pattern = "\\.zip$", full.names = TRUE)
+
+if (length(zip_files) == 0) {
+  stop("No .zip files found in the specified directory.")
+}
+
+# --- 3. EXTRACTION & PRE-AGGREGATION FUNCTION ---
+# This function opens a single zip, reads its CSVs, and aggregates the data instantly
+process_zip_batch <- function(zip_path) {
+  
+  # List all files inside the zip
+  zip_contents <- unzip(zip_path, list = TRUE)
+  csv_files <- zip_contents$Name[grepl("\\.csv$", zip_contents$Name, ignore.case = TRUE)]
+  
+  # Process each CSV inside this zip
+  map_dfr(csv_files, function(csv_name) {
+    
+    # Read ONLY the Site ID and Date columns to save memory
+    # Suppress warnings/messages for clean console output
+    raw_data <- read_csv(
+      unz(zip_path, csv_name),
+      col_types = cols_only(
+        SITE_XN_ROUTE = col_integer(),
+        DATE = col_character()
+      ),
+      show_col_types = FALSE
+    )
+    
+    # Immediately aggregate to total daily volume per site for this specific file
+    raw_data %>%
+      group_by(SITE_XN_ROUTE, DATE) %>%
+      summarise(Volume = n(), .groups = "drop")
+  })
+}
+
+# --- 4. EXECUTE EXTRACTION ---
+cat("Scanning and aggregating zip files. This may take a few minutes...\n")
+all_batches <- map_dfr(zip_files, process_zip_batch)
+
+# --- 5. CLEAN DATES & RESOLVE OVERLAPS ---
+cat("Cleaning dates and resolving overlaps...\n")
+
+clean_daily_counts <- all_batches %>%
+  # Convert DD/MM/YYYY text into formal Date objects
+  mutate(DATE_parsed = dmy(DATE)) %>%
+  filter(!is.na(DATE_parsed)) %>%
+  # Because zip files have overlapping dates (e.g., Jan 1st is in two zips),
+  # we group by Site and Date, and take the max() volume to ensure we 
+  # capture the complete day's count without double-counting identical records.
+  group_by(SITE_XN_ROUTE, DATE_parsed) %>%
+  summarise(Daily_Volume = max(Volume), .groups = "drop")
+
+# --- 6. FILTER FOR CONSISTENT LOCATIONS ---
+cat("Identifying consistently active counter locations...\n")
+
+# Determine the global start and end date of the entire dataset
+global_min_date <- min(clean_daily_counts$DATE_parsed)
+global_max_date <- max(clean_daily_counts$DATE_parsed)
+total_days_in_dataset <- as.numeric(global_max_date - global_min_date) + 1
+
+# Find sites that meet the consistency threshold
+consistent_sites <- clean_daily_counts %>%
+  group_by(SITE_XN_ROUTE) %>%
+  summarise(days_active = n_distinct(DATE_parsed), .groups = "drop") %>%
+  filter(days_active >= (total_days_in_dataset * consistency_threshold)) %>%
+  pull(SITE_XN_ROUTE)
+
+cat(sprintf("Found %d consistent sites out of all observed locations.\n", length(consistent_sites)))
+
+# --- 7. FINAL IDIOM 8 AGGREGATION ---
+cat("Generating final heatmap dataset...\n")
+
+idiom8_data <- clean_daily_counts %>%
+  # Keep only the highly reliable sites
+  filter(SITE_XN_ROUTE %in% consistent_sites) %>%
+  # Sum the volume across all consistent sites for each individual day
+  group_by(DATE_parsed) %>%
+  summarise(Total_Network_Volume = sum(Daily_Volume), .groups = "drop") %>%
+  # Ensure chronological order
+  arrange(DATE_parsed) %>%
+  # Rename for final CSV output
+  rename(Date = DATE_parsed)
+
+# --- 8. EXPORT ---
+write_csv(idiom8_data, output_csv)
+cat(sprintf("Success! Saved Idiom 8 data to: %s\n", output_csv))
+
+# Print a quick preview to the console
+head(idiom8_data)
+
+
+```
+
+
+```{r}
+daily_heatmap_data
+```
+
+
+
+
+```{r}
+library(tidyverse)
+library(lubridate)
+
+# 1. Define paths
+zip_path <- "data/bicycle_volume_speed_2024/Black Rock - Bicycle volume data 2020.zip"
+output_csv <- "data/black_rock_daily_volume.csv"
+
+# 2. Extract file names from the zip
+zip_contents <- unzip(zip_path, list = TRUE)
+# Filter for files that end exactly with ".csv." followed by 8 digits
+csv_files <- zip_contents$Name[grepl("\\.csv\\.\\d{8}$", zip_contents$Name, ignore.case = TRUE)]
+
+cat("Found", length(csv_files), "files to process.\n")
+
+# 3. Read and aggregate
+daily_volumes <- map_dfr(csv_files, function(file_name) {
+  
+  # Extract the last 8 characters (the YYYYMMDD date)
+  date_str <- str_extract(file_name, "\\d{8}$")
+  
+  # Read only the first column to save memory, as we just need the row count
+  raw_data <- read_csv(
+    unz(zip_path, file_name), 
+    col_select = 1, 
+    show_col_types = FALSE
+  )
+  
+  tibble(
+    Date_String = date_str,
+    Volume = nrow(raw_data)
+  )
+})
+
+# 4. Final Aggregation
+network_volume <- daily_volumes %>%
+  mutate(Date = ymd(Date_String)) %>%
+  # Group by date to aggregate all counters/directions for that specific day
+  group_by(Date) %>%
+  summarise(Total_Network_Volume = sum(Volume), .groups = "drop") %>%
+  arrange(Date)
+
+# Export
+write_csv(network_volume, output_csv)
+cat("Success! Exported to", output_csv, "\n")
+
+```
+
+
+```{r}
+zip_path <- "data/bicycle_volume_speed_2024/Black Rock - Bicycle volume data 2020.zip"
+output_csv <- "data/black_rock_daily_volume_fast.csv"
+
+file_list <- unzip(zip_path, list = TRUE)$Name
+csv_files <- file_list[grepl("\\.csv\\.\\d{8}$", file_list, ignore.case = TRUE)]
+
+# Pre-allocate empty vectors for speed
+volumes <- numeric(length(csv_files))
+dates <- character(length(csv_files))
+
+cat("Scanning", length(csv_files), "files...\n")
+
+for(i in seq_along(csv_files)) {
+  file_name <- csv_files[i]
+  
+  # Extract last 8 characters using standard substring
+  dates[i] <- substr(file_name, nchar(file_name) - 7, nchar(file_name))
+  
+  # Open connection, read lines as raw text, and count them
+  # Subtract 1 to account for the CSV header row
+  con <- unz(zip_path, file_name)
+  volumes[i] <- length(readLines(con)) - 1 
+}
+
+# Build the dataframe
+df <- data.frame(Date_String = dates, Volume = volumes)
+df$Date <- as.Date(df$Date_String, format = "%Y%m%d")
+
+# Aggregate using Base R
+network_volume <- aggregate(Volume ~ Date, data = df, sum)
+names(network_volume)[2] <- "Total_Network_Volume"
+network_volume <- network_volume[order(network_volume$Date), ]
+
+write.csv(network_volume, output_csv, row.names = FALSE)
+cat("Completed fast extraction to", output_csv, "\n")
+```
+
+
+
+
+
+
+
+
+
+
+
