@@ -1,0 +1,110 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Idiom 9: Multi-Metric Station Profile",
+    "subtitle": "Parallel coordinates tracking volume criteria against active transport proximity",
+    "subtitleColor": "#666666",
+    "subtitleFontStyle": "italic"
+  },
+  "width": 600,
+  "height": 400,
+  "background": "#f9f9f9",
+  "data": {
+    "url": "data/station_profiles.csv"
+  },
+  "params": [
+    {
+      "name": "Line_Selector",
+      "value": "All",
+      "bind": {
+        "input": "select",
+        "options": [
+          "All",
+          "Alamein Line",
+          "Belgrave Line",
+          "Craigieburn Line",
+          "Cranbourne Line",
+          "Flemington Line",
+          "Frankston Line",
+          "Glen Waverly Line",
+          "Hurstbridge Line",
+          "Lilydale Line",
+          "Mernda Line",
+          "Pakenham Line",
+          "Sandringham Line",
+          "Stony Point Line",
+          "Sunbury Line",
+          "Upfield Line",
+          "Werribee Line",
+          "Williamstown Line"
+        ],
+        "name": "Select Train Line: "
+      }
+    },
+    {
+      "name": "hover",
+      "select": {
+        "type": "point",
+        "on": "pointerover",
+        "clear": "pointerout"
+      }
+    }
+  ],
+  "transform": [
+    {
+      "filter": "Line_Selector == 'All' || datum.Train_Line == Line_Selector"
+    },
+    {
+      "fold": ["Pax_annual_norm", "Pax_AM_peak_norm", "Bike_Path_Dist_m_norm"],
+      "as": ["Metric_Type", "Normalized_Score"]
+    },
+    {
+      "calculate": "datum.Metric_Type == 'Pax_annual_norm' ? '1. Annual Volume' : datum.Metric_Type == 'Pax_AM_peak_norm' ? '2. AM Peak Volume' : '3. Distance to Bike Path'",
+      "as": "Axis_Label"
+    }
+  ],
+  "mark": {
+    "type": "line",
+    "point": {"filled": true, "size": 40},
+    "strokeWidth": 2
+  },
+  "encoding": {
+    "x": {
+      "field": "Axis_Label",
+      "type": "nominal",
+      "title": "Evaluation Criteria",
+      "axis": {"labelAngle": 0, "labelFontSize": 12, "labelPadding": 10}
+    },
+    "y": {
+      "field": "Normalized_Score",
+      "type": "quantitative",
+      "title": "Normalized Score (Low to High)",
+      "axis": {"grid": true, "labels": false, "ticks": false} 
+    },
+    "color": {
+      "field": "Train_Line",
+      "type": "nominal",
+      "scale": {"scheme": "category10"},
+      "title": "Train Line"
+    },
+    "detail": {
+      "field": "Stop_name",
+      "type": "nominal"
+    },
+    "opacity": {
+      "condition": {
+        "param": "hover",
+        "empty": false,
+        "value": 1
+      },
+      "value": 0.2
+    },
+    "tooltip": [
+      {"field": "Stop_name", "type": "nominal", "title": "Station"},
+      {"field": "Train_Line", "type": "nominal", "title": "Line"},
+      {"field": "Pax_annual", "type": "quantitative", "title": "Annual Patronage", "format": ","},
+      {"field": "Pax_AM_peak", "type": "quantitative", "title": "AM Peak Entries", "format": ","},
+      {"field": "Bike_Path_Dist_m", "type": "quantitative", "title": "Distance to Cycle Path (m)", "format": ".1f"}
+    ]
+  }
+}

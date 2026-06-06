@@ -1,0 +1,87 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Idiom 10: Infrastructure Utilization Targets",
+    "subtitle": "Current volume vs. State planning benchmarks (Cycling Level of Service & Rail Recovery)",
+    "subtitleColor": "#666666",
+    "subtitleFontStyle": "italic"
+  },
+  "width": 600,
+  "height": 150,
+  "background": "#f9f9f9",
+  "data": {
+    "values": [
+      {
+        "Metric": "Key Corridor Daily Cyclists",
+        "Poor": 250,
+        "Good": 750,
+        "Excellent": 1500,
+        "Measure": 680,
+        "Target": 1000
+      },
+      {
+        "Metric": "Suburban Hub Rail Recovery (%)",
+        "Poor": 60,
+        "Good": 90,
+        "Excellent": 120,
+        "Measure": 82,
+        "Target": 100
+      }
+    ]
+  },
+  "facet": {
+    "row": {
+      "field": "Metric",
+      "type": "nominal",
+      "title": null,
+      "header": {"labelAngle": 0, "labelAlign": "left", "labelFontSize": 12, "labelPadding": -10}
+    }
+  },
+  "resolve": {
+    "scale": {"x": "independent"}
+  },
+  "spec": {
+    "layer": [
+      {
+        "description": "Background Range 3: Excellent",
+        "mark": {"type": "bar", "color": "#e5e5e5"},
+        "encoding": {
+          "x": {"field": "Excellent", "type": "quantitative", "title": "Volume / Percentage Score"}
+        }
+      },
+      {
+        "description": "Background Range 2: Good",
+        "mark": {"type": "bar", "color": "#cccccc"},
+        "encoding": {
+          "x": {"field": "Good", "type": "quantitative"}
+        }
+      },
+      {
+        "description": "Background Range 1: Poor",
+        "mark": {"type": "bar", "color": "#b3b3b3"},
+        "encoding": {
+          "x": {"field": "Poor", "type": "quantitative"}
+        }
+      },
+      {
+        "description": "Foreground Bar: Actual Measured Volume",
+        "mark": {"type": "bar", "color": "#1f77b4", "size": 15},
+        "encoding": {
+          "x": {"field": "Measure", "type": "quantitative"},
+          "tooltip": [
+            {"field": "Metric", "type": "nominal", "title": "KPI"},
+            {"field": "Measure", "type": "quantitative", "title": "Current Performance"},
+            {"field": "Target", "type": "quantitative", "title": "State Target"}
+          ]
+        }
+      },
+      {
+        "description": "Target Marker (Tick)",
+        "mark": {"type": "tick", "color": "#d62728", "thickness": 3, "size": 35},
+        "encoding": {
+          "x": {"field": "Target", "type": "quantitative"}
+        }
+      }
+    ]
+  }
+}

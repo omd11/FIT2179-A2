@@ -15,6 +15,18 @@
     "center": [145, -37.86],
     "scale": 38000
   },
+  "params": [
+    {
+      "name": "Peak_Selector",
+      "value": "Pax_PM_peak",
+      "bind": {
+        "input": "radio",
+        "options": ["Pax_AM_peak", "Pax_PM_peak"],
+        "labels": ["AM Peak", "PM Peak"],
+        "name": "Select Peak Period: "
+      }
+    }
+  ],
   "layer": [
     {
       "description": "Choropleth Reference Base Context for Symbols",
@@ -35,6 +47,12 @@
         "url": "data/annual_metropolitan_train_station_entries_fy_2024_2025.csv",
         "format": {"type": "csv"}
       },
+      "transform": [
+        {
+          "calculate": "datum[Peak_Selector]",
+          "as": "dynamic_peak_volume"
+        }
+      ],
       "mark": {
         "type": "circle",
         "stroke": "#333333",
@@ -54,17 +72,30 @@
           "field": "Pax_annual",
           "type": "quantitative",
           "scale": {
-            "range": [20, 600]
+            "type": "pow",
+            "exponent": 0.7,
+            "range":[15,1000],
+            "domain": [400000, 20000000],
+            "clamp": true
           },
           "title": "Annual Volume"
         },
         "color": {
-          "field": "Pax_annual",
+          "field": "dynamic_peak_volume",
           "type": "quantitative",
           "scale": {
-            "scheme": "blues"
+            "type": "pow",
+            "exponent": 0.1,
+            "scheme": "blues",
+            "domainMin": 200,
+            "domainMax": {
+              "expr": "Peak_Selector == 'Pax_AM_peak' ? 20000 : 20000"
+            },
+            "rangeMin":20,
+            "rangeMax":5000,
+            "clamp": true
           },
-          "title": "Crowding Intensity"
+          "title": "Peak Volume"
         },
         "tooltip": [
           {"field": "Stop_name", "type": "nominal", "title": "Station"},
