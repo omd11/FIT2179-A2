@@ -22,6 +22,10 @@
   },
   "transform": [
     {
+      "calculate": "toNumber(timeFormat(datum.Date, '%U'))",
+      "as": "Week_Number"
+    },
+    {
       "sort": [{"field": "Date"}],
       "window": [{
         "op": "mean", 
@@ -46,11 +50,11 @@
       }
     },
     "x": {
-      "field": "Date",
-      "timeUnit": "week",
+      "field": "Week_Number",
       "type": "ordinal",
       "title": "Week of the Year",
       "axis": {
+        "labelExpr": "'W' + datum.value", 
         "labelAngle": 0,
         "labelOverlap": true,
         "tickSize": 0,
@@ -75,7 +79,7 @@
       "title": "Total Daily Cyclists",
       "scale": {
         "scheme": "magma",
-        "domain": [0, 4000],
+        "domain": [0, 3500],
         "clamp": true
       },
       "legend": {
