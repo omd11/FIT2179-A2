@@ -2,7 +2,6 @@
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "description": "Temporal Patronage and Commuter Mode Shift Dashboard",
   "background": "#f9f9f9",
-  
   "title": {
     "text": "Idiom 4: Active vs. Rail Commuter Shift",
     "subtitle": "Normalized comparison of weekend vs. weekday mobility choices",
@@ -12,28 +11,34 @@
   "width": 350,
   "height": 300,
   "data": {
-    "url": "data/commuter_shift.csv" 
+    "url": "data/commuter_shift.csv"
   },
   "mark": {
-    "type": "bar",
-    "cornerRadiusTopLeft": 3,
-    "cornerRadiusTopRight": 3
+    "type": "line",
+    "point": {
+      "filled": true,
+      "size": 80
+    },
+    "strokeWidth": 3
   },
   "encoding": {
     "x": {
       "field": "Day_Type",
       "type": "nominal",
       "title": "Day Category",
-      "axis": {"labelAngle": 0, "labelFontSize": 12}
-    },
-    "xOffset": {
-      "field": "Transport_Mode",
-      "type": "nominal"
+      "sort": ["Weekday", "Weekend"],
+      "axis": {
+        "labelAngle": 0,
+        "labelFontSize": 12
+      }
     },
     "y": {
       "field": "Normalized_Volume",
       "type": "quantitative",
-      "title": "Normalized Index (0-100)"
+      "title": "Normalized Index (0-100)",
+      "scale": {
+        "domain": [0, 100]
+      }
     },
     "color": {
       "field": "Transport_Mode",
@@ -41,7 +46,7 @@
       "title": "Transport Mode",
       "scale": {
         "domain": ["Metro Train", "Bicycle"],
-        "range": ["#1f77b4", "#2ca02c"] 
+        "range": ["#1f77b4", "#2ca02c"]
       }
     },
     "tooltip": [
@@ -50,6 +55,4 @@
       {"field": "Normalized_Volume", "type": "quantitative", "title": "Index Value", "format": ".1f"}
     ]
   }
-
-  
 }
