@@ -98,7 +98,7 @@
             },
             "color": {
               "condition": {"param": "site_select", "empty": false, "value": "#e74c3c"},
-              "value": "#1f77b4"
+              "value": "#0d360d"
             },
             "opacity": {
               "condition": {"param": "site_select", "value": 1.0},
