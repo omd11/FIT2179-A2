@@ -1,87 +1,148 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "title": {
-    "text": "Idiom 10: Infrastructure Utilization Targets",
-    "subtitle": "Current volume vs. State planning benchmarks (Cycling Level of Service & Rail Recovery)",
-    "subtitleColor": "#666666",
-    "subtitleFontStyle": "italic"
+
+  "width": "container",
+  "height": 500, 
+  "autosize": {
+    "type": "fit-x",
+    "contains": "padding"
   },
-  "width": 600,
-  "height": 150,
   "background": "#f9f9f9",
   "data": {
-    "values": [
-      {
-        "Metric": "Key Corridor Daily Cyclists",
-        "Poor": 250,
-        "Good": 750,
-        "Excellent": 1500,
-        "Measure": 680,
-        "Target": 1000
-      },
-      {
-        "Metric": "Suburban Hub Rail Recovery (%)",
-        "Poor": 60,
-        "Good": 90,
-        "Excellent": 120,
-        "Measure": 82,
-        "Target": 100
-      }
-    ]
+    "url": "data/unified_station_metrics.csv"
   },
-  "facet": {
-    "row": {
-      "field": "Metric",
-      "type": "nominal",
-      "title": null,
-      "header": {"labelAngle": 0, "labelAlign": "left", "labelFontSize": 12, "labelPadding": -10}
+  "params": [
+    {
+      "name": "Line_Selector",
+      "value": "All",
+      "bind": {
+        "input": "select",
+        "options": [
+          "All", "Alamein Line", "Belgrave Line", "Craigieburn Line", "Cranbourne Line",
+          "Flemington Line", "Frankston Line", "Glen Waverly Line", "Hurstbridge Line",
+          "Lilydale Line", "Mernda Line", "Pakenham Line", "Sandringham Line",
+          "Stony Point Line", "Sunbury Line", "Upfield Line", "Werribee Line", "Williamstown Line"
+        ],
+        "name": "Filter Train Line: "
+      }
+    },
+    {
+      "name": "hover",
+      "select": {
+        "type": "point",
+        "on": "pointerover",
+        "clear": "pointerout"
+      }
     }
+  ],
+  "transform": [
+    {
+      "calculate": "datum.Pax_PM_peak > 0 ? datum.Pax_AM_peak / datum.Pax_PM_peak : 0",
+      "as": "AM_PM_Ratio"
+    },
+    {
+      "calculate": "datum.Pax_weekday > 0 ? (datum.Pax_Saturday + datum.Pax_Sunday) / datum.Pax_weekday : 0",
+      "as": "Weekend_Ratio"
+    },
+    {
+      "calculate": "log(datum.Pax_annual + 1)",
+      "as": "log_volume"
+    },
+    {
+      "calculate": "log(datum.total_safe_bike_path_meters + 1)",
+      "as": "log_path"
+    },
+    {
+      "joinaggregate": [
+        {"op": "min", "field": "log_volume", "as": "min_vol"},
+        {"op": "max", "field": "log_volume", "as": "max_vol"},
+        {"op": "min", "field": "AM_PM_Ratio", "as": "min_ampm"},
+        {"op": "max", "field": "AM_PM_Ratio", "as": "max_ampm"},
+        {"op": "min", "field": "Weekend_Ratio", "as": "min_wknd"},
+        {"op": "max", "field": "Weekend_Ratio", "as": "max_wknd"},
+        {"op": "min", "field": "Bike_Path_Dist_m", "as": "min_dist"},
+        {"op": "max", "field": "Bike_Path_Dist_m", "as": "max_dist"},
+        {"op": "min", "field": "log_path", "as": "min_path"},
+        {"op": "max", "field": "log_path", "as": "max_path"}
+      ]
+    },
+    {
+      "calculate": "datum.max_vol === datum.min_vol ? 0 : (datum.log_volume - datum.min_vol) / (datum.max_vol - datum.min_vol)",
+      "as": "norm_vol"
+    },
+    {
+      "calculate": "datum.max_ampm === datum.min_ampm ? 0 : (datum.AM_PM_Ratio - datum.min_ampm) / (datum.max_ampm - datum.min_ampm)",
+      "as": "norm_ampm"
+    },
+    {
+      "calculate": "datum.max_wknd === datum.min_wknd ? 0 : (datum.Weekend_Ratio - datum.min_wknd) / (datum.max_wknd - datum.min_wknd)",
+      "as": "norm_wknd"
+    },
+    {
+      "calculate": "datum.max_dist === datum.min_dist ? 0 : 1 - ((datum.Bike_Path_Dist_m - datum.min_dist) / (datum.max_dist - datum.min_dist))",
+      "as": "norm_dist"
+    },
+    {
+      "calculate": "datum.max_path === datum.min_path ? 0 : (datum.log_path - datum.min_path) / (datum.max_path - datum.min_path)",
+      "as": "norm_path"
+    },
+    {
+      "filter": "Line_Selector == 'All' || datum.Train_Line == Line_Selector"
+    },
+    {
+      "fold": ["norm_vol", "norm_ampm", "norm_wknd", "norm_dist", "norm_path"],
+      "as": ["Metric_Type", "Normalized_Score"]
+    },
+    {
+      "calculate": "datum.Metric_Type == 'norm_vol' ? '1. Log Annual Volume' : datum.Metric_Type == 'norm_ampm' ? '2. Origin Skew (AM/PM)' : datum.Metric_Type == 'norm_wknd' ? '3. Leisure Skew (Wknd/Wkday)' : datum.Metric_Type == 'norm_dist' ? '4. Proximity to Path (Closer = Higher)' : '5. Log Safe Path Connectivity'",
+      "as": "Axis_Label"
+    }
+  ],
+  "mark": {
+    "type": "line",
+    "point": {"filled": true, "size": 50},
+    "strokeWidth": 2.5
   },
-  "resolve": {
-    "scale": {"x": "independent"}
-  },
-  "spec": {
-    "layer": [
-      {
-        "description": "Background Range 3: Excellent",
-        "mark": {"type": "bar", "color": "#e5e5e5"},
-        "encoding": {
-          "x": {"field": "Excellent", "type": "quantitative", "title": "Volume / Percentage Score"}
-        }
+  "encoding": {
+    "x": {
+      "field": "Axis_Label",
+      "type": "nominal",
+      "title": "Network-Wide Evaluation Criteria",
+      "axis": {"labelAngle": -75, "labelFontSize": 10, "labelPadding": 5}
+    },
+    "y": {
+      "field": "Normalized_Score",
+      "type": "quantitative",
+      "title": "Relative Score (Global Network Benchmark)",
+      "axis": {"grid": true, "labels": false, "ticks": false} 
+    },
+    "color": {
+      "field": "Train_Line",
+      "type": "nominal",
+      "scale": {"scheme": "category20"},
+      "title": "Train Line",
+      "legend": {"columns": 2, "symbolType": "stroke"}
+    },
+    "detail": {
+      "field": "Stop_name",
+      "type": "nominal"
+    },
+    "opacity": {
+      "condition": {
+        "param": "hover",
+        "empty": false,
+        "value": 1
       },
-      {
-        "description": "Background Range 2: Good",
-        "mark": {"type": "bar", "color": "#cccccc"},
-        "encoding": {
-          "x": {"field": "Good", "type": "quantitative"}
-        }
-      },
-      {
-        "description": "Background Range 1: Poor",
-        "mark": {"type": "bar", "color": "#b3b3b3"},
-        "encoding": {
-          "x": {"field": "Poor", "type": "quantitative"}
-        }
-      },
-      {
-        "description": "Foreground Bar: Actual Measured Volume",
-        "mark": {"type": "bar", "color": "#1f77b4", "size": 15},
-        "encoding": {
-          "x": {"field": "Measure", "type": "quantitative"},
-          "tooltip": [
-            {"field": "Metric", "type": "nominal", "title": "KPI"},
-            {"field": "Measure", "type": "quantitative", "title": "Current Performance"},
-            {"field": "Target", "type": "quantitative", "title": "State Target"}
-          ]
-        }
-      },
-      {
-        "description": "Target Marker (Tick)",
-        "mark": {"type": "tick", "color": "#d62728", "thickness": 3, "size": 35},
-        "encoding": {
-          "x": {"field": "Target", "type": "quantitative"}
-        }
-      }
+      "value": 0.6
+    },
+    "tooltip": [
+      {"field": "Stop_name", "type": "nominal", "title": "Station"},
+      {"field": "Train_Line", "type": "nominal", "title": "Line"},
+      {"field": "Pax_annual", "type": "quantitative", "title": "Annual Patronage", "format": ","},
+      {"field": "AM_PM_Ratio", "type": "quantitative", "title": "AM/PM Origin Skew", "format": ".2f"},
+      {"field": "Weekend_Ratio", "type": "quantitative", "title": "Weekend Leisure Skew", "format": ".2f"},
+      {"field": "Bike_Path_Dist_m", "type": "quantitative", "title": "Distance to Cycle Path (m)", "format": ".0f"},
+      {"field": "total_safe_bike_path_meters", "type": "quantitative", "title": "Total Safe Path Connect (m)", "format": ",.0f"}
     ]
   }
 }

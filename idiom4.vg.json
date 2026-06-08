@@ -2,57 +2,84 @@
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "description": "Temporal Patronage and Commuter Mode Shift Dashboard",
   "background": "#f9f9f9",
-  "title": {
-    "text": "Idiom 4: Active vs. Rail Commuter Shift",
-    "subtitle": "Normalized comparison of weekend vs. weekday mobility choices",
-    "subtitleColor": "#666666",
-    "subtitleFontStyle": "italic"
+  "width": "container",
+  "height": 400, 
+  "autosize": {
+    "type": "fit-x",
+    "contains": "padding"
   },
-  "width": 350,
-  "height": 300,
   "data": {
-    "url": "data/commuter_shift.csv"
+    "url": "data/idiom4_commuter_shift.csv"
   },
-  "mark": {
-    "type": "line",
-    "point": {
-      "filled": true,
-      "size": 80
+  "transform": [
+    {
+      "filter": "datum.Day_Type == 'Weekend'"
     },
-    "strokeWidth": 3
-  },
+    {
+      "calculate": "format(datum.Normalized_Volume, '.1f') + '%'",
+      "as": "Retention_Label"
+    }
+  ],
   "encoding": {
     "x": {
-      "field": "Day_Type",
+      "field": "Transport_Mode",
       "type": "nominal",
-      "title": "Day Category",
-      "sort": ["Weekday", "Weekend"],
+      "title": null,
       "axis": {
         "labelAngle": 0,
-        "labelFontSize": 12
+        "labelFontSize": 14,
+        "labelFontWeight": "bold"
       }
     },
     "y": {
       "field": "Normalized_Volume",
       "type": "quantitative",
-      "title": "Normalized Index (0-100)",
+      "title": "Weekend Retention Rate (%)",
       "scale": {
         "domain": [0, 100]
+      },
+      "axis": {
+        "gridDash": [4, 4],
+        "titlePadding": 10
       }
     },
     "color": {
       "field": "Transport_Mode",
       "type": "nominal",
-      "title": "Transport Mode",
+      "legend": null, 
       "scale": {
         "domain": ["Metro Train", "Bicycle"],
         "range": ["#1f77b4", "#2ca02c"]
       }
+    }
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "bar",
+        "cornerRadiusEnd": 4,
+        "width": {"band": 0.5} 
+      }
     },
-    "tooltip": [
-      {"field": "Transport_Mode", "type": "nominal", "title": "Mode"},
-      {"field": "Day_Type", "type": "nominal", "title": "Day"},
-      {"field": "Normalized_Volume", "type": "quantitative", "title": "Index Value", "format": ".1f"}
-    ]
-  }
+    {
+      "mark": {
+        "type": "text",
+        "align": "center",
+        "baseline": "bottom",
+        "dy": -8,
+        "fontSize": 14,
+        "fontWeight": "bold"
+      },
+      "encoding": {
+        "text": {
+          "field": "Retention_Label",
+          "type": "nominal"
+        },
+        "tooltip": [
+          {"field": "Transport_Mode", "type": "nominal", "title": "Mode"},
+          {"field": "Normalized_Volume", "type": "quantitative", "title": "Weekend Retention (%)", "format": ".1f"}
+        ]
+      }
+    }
+  ]
 }

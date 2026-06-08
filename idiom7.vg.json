@@ -1,18 +1,8 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v5.json",
-  "description": "Sankey Chart by David Bacci: https://www.linkedin.com/in/davbacci/ adapted for PTV flow",
-  "width": 800,
-  "height": 550,
-  "padding": {"bottom": 20, "left": 50, "right": 50, "top": 40},
-  "title": {
-    "text": "Idiom 7: The Commuter Journey Destination Split",
-    "subtitle": "AM Peak inbound network flow from outer regional sectors into central CBD Hubs",
-    "color": "#1f77b4",
-    "fontSize": 24,
-    "dy": -10,
-    "fontWeight": "bold",
-    "offset": 20
-  },
+  "width": 400,
+  "height": 400,
+
   "background": "#f9f9f9",
   "signals": [
     {
@@ -319,27 +309,8 @@
           }
         }
       ]
-    },
-    {
-      "type": "text",
-      "data": [{}],
-      "encode": {
-        "update": {
-          "text": {
-            "value": [
-              "Data: Annual Metropolitan Train Station Patronage (Derived Aggregations)",
-              "Original Sankey Template by David Bacci"
-            ]
-          },
-          "align": {"value": "left"},
-          "lineHeight": {"value": 16},
-          "fill": {"value": "#888888"},
-          "x": {"signal": "0"},
-          "y": {"signal": "height + 30"},
-          "fontSize": {"value": 11}
-        }
-      }
     }
+   
   ],
   "config": {
     "view": {"stroke": "transparent"},

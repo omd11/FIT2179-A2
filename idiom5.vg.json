@@ -1,62 +1,115 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "title": {
-    "text": "Idiom 5: Cycling Flow vs. Path Availability",
-    "subtitle": "Evaluating if continuous, unbroken infrastructure triggers higher daily cycling adoption",
-    "subtitleColor": "#666666",
-    "subtitleFontStyle": "italic"
+  "width": "container",
+  "height": 400, 
+  "autosize": {
+    "type": "fit-x",
+    "contains": "padding"
   },
-  "width": 650,
-  "height": 450,
   "background": "#f9f9f9",
   "data": {
     "url": "data/cycling_flow_continuous_paths.csv"
   },
   "params": [
     {
-      "name": "path_selector",
-      "select": {"type": "point", "fields": ["Path_Type"]},
-      "bind": "legend"
+      "name": "Volume_Metric",
+      "value": "Avg_Daily_Volume",
+      "bind": {
+        "input": "select",
+        "options": [
+          "Avg_Daily_Volume", 
+          "Avg_Weekday_Volume", 
+          "Avg_Weekend_Volume"
+        ],
+        "labels": [
+          "Overall Daily Average", 
+          "Average Weekday (Mon-Fri)", 
+          "Average Weekend Day (Sat-Sun)"
+        ],
+        "name": "Select Temporal Metric: "
+      }
+    }
+  ],
+  "transform": [
+    {
+      "calculate": "random()",
+      "as": "jitter"
+    },
+    {
+      "calculate": "datum[Volume_Metric]",
+      "as": "Selected_Volume"
     }
   ],
   "mark": {
     "type": "circle",
-    "size": 80,
     "stroke": "#ffffff",
     "strokeWidth": 0.5,
-    "opacity": 0.8
+    "opacity": 0.75
   },
   "encoding": {
     "x": {
-      "field": "Avg_Daily_Volume",
+      "field": "Path_Type",
+      "type": "nominal",
+      "title": "Infrastructure Classification (Ranked Lowest to Highest Protection)",
+      "sort": [
+        "Shared street (sharrows)",
+        "Basic painted lane",
+        "Protected bike lane (on-road)",
+        "Shared use path (off-road)",
+        "Separated path (off-road)"
+      ],
+      "axis": {
+        "labelAngle": -20,
+        "labelFontSize": 8,
+        "titlePadding": 15
+      }
+    },
+    "xOffset": {
+      "field": "jitter",
       "type": "quantitative",
-      "title": "Average Daily Cyclist Volume",
-      "axis": {"grid": false}
+      "axis": null
     },
     "y": {
+      "field": "Selected_Volume",
+      "type": "quantitative",
+      "title": "Cyclist Volume (Based on Selection)",
+      "scale": {
+        "domain": [0, 2800] 
+      },
+      "axis": {
+        "gridDash": [4, 4],
+        "titlePadding": 10
+      }
+    },
+    "size": {
       "field": "Continuous_Length_m",
       "type": "quantitative",
-      "title": "Continuous Unbroken Path Length (meters)",
-      "scale": {"type": "log"}, 
-      "axis": {"gridDash": [4, 4]}
+      "title": "Continuous Length (m)",
+      "scale": {
+        "range": [50, 1200]
+      }
     },
     "color": {
       "field": "Path_Type",
       "type": "nominal",
-      "title": "Infrastructure Classification",
-      "scale": {"scheme": "category10"}
-    },
-    "opacity": {
-      "condition": {"param": "path_selector", "value": 0.8},
-      "value": 0.1
+      "legend": null, 
+      "scale": {
+        "domain": [
+          "Shared street (sharrows)",
+          "Basic painted lane",
+          "Protected bike lane (on-road)",
+          "Shared use path (off-road)",
+          "Separated path (off-road)"
+        ],
+        "range": ["#d62728", "#ff7f0e", "#1f77b4", "#9467bd", "#2ca02c"]
+      }
     },
     "tooltip": [
       {"field": "SITE_XN_ROUTE", "type": "nominal", "title": "Counter Site ID"},
       {"field": "Path_Name", "type": "nominal", "title": "Path Name"},
       {"field": "Path_Type", "type": "nominal", "title": "Infrastructure Type"},
-      {"field": "Avg_Daily_Volume", "type": "quantitative", "title": "Avg. Daily Flow", "format": ","},
-      {"field": "Avg_Weekday_Volume", "type": "quantitative", "title": "Avg. Weekday Flow", "format": ","},
-      {"field": "Avg_Weekend_Volume", "type": "quantitative", "title": "Avg. Weekend Flow", "format": ","},
+      {"field": "Selected_Volume", "type": "quantitative", "title": "Selected Flow Metric", "format": ","},
+      {"field": "Avg_Daily_Volume", "type": "quantitative", "title": "Avg. Overall Flow", "format": ","},
       {"field": "Continuous_Length_m", "type": "quantitative", "title": "Total Continuous Length (m)", "format": ",.0f"}
     ]
   }

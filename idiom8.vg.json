@@ -1,24 +1,8 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "title": {
-    "text": "Idiom 8: Annual Cycling Reliability",
-    "subtitle": "Daily active cycling volume across historical calendar years in a sample site",
-    "subtitleColor": "#666666",
-    "subtitleFontStyle": "italic",
-    "anchor": "start",
-    "offset": 15
-  },
-  "width": 800,
-  "height": 80, 
   "background": "#f9f9f9",
   "data": {
     "url": "data/black_rock_daily_volume.csv"
-  },
-  "mark": {
-    "type": "rect",
-    "cornerRadius": 2,
-    "stroke": "#ffffff",
-    "strokeWidth": 1.5
   },
   "transform": [
     {
@@ -35,7 +19,7 @@
       "frame": [-1, 1]
     }
   ],
-  "encoding": {
+  "facet": {
     "row": {
       "field": "Date",
       "timeUnit": "year",
@@ -48,72 +32,87 @@
         "labelFontWeight": "bold",
         "labelPadding": 10
       }
+    }
+  },
+  "spec": {
+    "width": 475,
+    "height": 50,
+    "mark": {
+      "type": "rect",
+      "cornerRadius": 2,
+      "stroke": "#ffffff",
+      "strokeWidth": 1.5
     },
-    "x": {
-      "field": "Week_Number",
-      "type": "ordinal",
-      "title": "Week of the Year",
-      "axis": {
-        "labelExpr": "'W' + datum.value", 
-        "labelAngle": 0,
-        "labelOverlap": true,
-        "tickSize": 0,
-        "domain": false
-      }
-    },
-    "y": {
-      "field": "Date",
-      "timeUnit": "day",
-      "type": "ordinal",
-      "title": null,
-      "axis": {
-        "format": "%a",
-        "labelPadding": 8,
-        "tickSize": 0,
-        "domain": false
-      }
-    },
-    "color": {
-      "field": "Smoothed_Volume",
-      "type": "quantitative",
-      "title": "Total Daily Cyclists",
-      "scale": {
-        "scheme": "magma",
-        "domain": [0, 3500],
-        "clamp": true
+    "encoding": {
+      "x": {
+        "field": "Week_Number",
+        "type": "ordinal",
+        "title": "Week of the Year",
+        "axis": {
+          "labelExpr": "'Week ' + datum.value", 
+          "labelAngle": -90,
+          "labelOverlap": true,
+          "tickSize": 0,
+          "domain": false
+        }
       },
-      "legend": {
-        "direction": "horizontal",
-        "orient": "bottom",
-        "titleAnchor": "middle",
-        "gradientLength": 300,
-        "titlePadding": 10
-      }
-    },
-    "tooltip": [
-      {
+      "y": {
         "field": "Date",
-        "timeUnit": "yearmonthdate",
-        "type": "temporal",
-        "title": "Date"
+        "timeUnit": "day",
+        "type": "ordinal",
+        "title": null,
+        "axis": {
+          "format": "%a",
+          "labelPadding": 8,
+          "tickSize": 0,
+          "domain": false
+        }
       },
-      {
+      "color": {
         "field": "Smoothed_Volume",
         "type": "quantitative",
-        "title": "Smoothed Volume",
-        "format": ",.0f"
+        "title": "Total Daily Cyclists",
+        "scale": {
+          "scheme": "magma",
+          "domain": [0, 3500],
+          "clamp": true
+        },
+        "legend": {
+          "direction": "horizontal",
+          "orient": "bottom",
+          "titleAnchor": "middle",
+          "gradientLength": 200, 
+          "titlePadding": 10
+        }
       },
-      {
-        "field": "Total_Network_Volume",
-        "type": "quantitative",
-        "title": "Raw Daily Volume",
-        "format": ","
-      }
-    ]
+      "tooltip": [
+        {
+          "field": "Date",
+          "timeUnit": "yearmonthdate",
+          "type": "temporal",
+          "title": "Date"
+        },
+        {
+          "field": "Smoothed_Volume",
+          "type": "quantitative",
+          "title": "Smoothed Volume",
+          "format": ",.0f"
+        },
+        {
+          "field": "Total_Network_Volume",
+          "type": "quantitative",
+          "title": "Raw Daily Volume",
+          "format": ","
+        }
+      ]
+    }
   },
   "config": {
     "view": {
       "stroke": "transparent"
+    },
+    "facet": {
+      "spacing": 8 
     }
   }
 }

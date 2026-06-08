@@ -2,24 +2,40 @@
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "description": "Bimodal Transport Network Layer",
   "background": "#f9f9f9",
-  "title": {
-    "text": "Bimodal Transport Network Layer",
-    "subtitle": "Active cycling paths and train networks across Greater Melbourne",
-    "subtitleColor": "#666666",
-    "subtitleFontStyle": "italic"
+  "width": "container",
+  "height": 400, 
+  "autosize": {
+    "type": "fit-x",
+    "contains": "padding"
   },
-  "width": 500,
-  "height": 500,
   "projection": {
     "type": "mercator",
     "center": [145, -37.86],
-    "scale": 38000
+    "scale": 39000
   },
+  "params": [
+    {
+      "name": "Show_Safe",
+      "value": true,
+      "bind": {
+        "input": "checkbox", 
+        "name": "✅ Show Safe/Separated Paths: "
+      }
+    },
+    {
+      "name": "Show_Unsafe",
+      "value": true,
+      "bind": {
+        "input": "checkbox", 
+        "name": "⚠️ Show Unsafe/Painted Lanes: "
+      }
+    }
+  ],
   "layer": [
     {
       "description": "LAYER 0: Victorian Regional/LGA Basemap Container",
       "data": {
-        "url": "data/SA3_2016_AUST.json",
+        "url": "data/SA3_2016_AUST.topojson",
         "format": {"type": "topojson", "feature": "SA3_2016_AUST"}
       },
       "mark": {
@@ -28,6 +44,7 @@
         "stroke": "#bcbfca",
         "strokeWidth": 1
       },
+      
       "encoding": {
         "tooltip": [
           {"field": "properties.SA3_NAME16", "type": "nominal", "title": "Region"}
@@ -35,29 +52,47 @@
       }
     },
     {
-      "description": "Layer 1: Bicycle Infrastructure Network (Base Network)",
+      "description": "Layer 1: Bicycle Infrastructure Network",
       "data": {
         "url": "data/bicycle_infrastructure_network.topojson",
         "format": {"type": "topojson", "feature": "bicycle_infrastructure_network"}
       },
+      "transform": [
+        {
+          "calculate": "test(/Protected|off-road/i, datum.properties.InfraType) ? 'Safe/Separated' : 'Unsafe/Mixed Traffic'",
+          "as": "Safety_Rating"
+        },
+        {
+          "filter": "(Show_Safe && datum.Safety_Rating == 'Safe/Separated') || (Show_Unsafe && datum.Safety_Rating == 'Unsafe/Mixed Traffic')"
+        }
+      ],
       "mark": {
         "type": "geoshape",
-        "stroke": "#2ca02c", 
         "strokeWidth": 1.2,
-        "opacity": 0.5,
+        "opacity": 0.8,
         "fill": "transparent" 
       },
       "encoding": {
+        "stroke": {
+          "field": "Safety_Rating",
+          "type": "nominal",
+          "scale": {
+            "domain": ["Safe/Separated", "Unsafe/Mixed Traffic"],
+            "range": ["#2E8B57", "#ff7f0e"] 
+          },
+          "legend": null
+        },
         "tooltip": [
-          {"field": "properties.HwyType", "type": "nominal", "title": "Cycle Path"}
+          {"field": "properties.InfraType", "type": "nominal", "title": "Infrastructure Type"},
+          {"field": "Safety_Rating", "type": "nominal", "title": "Safety Category"}
         ]
       }
     },
     {
       "description": "Layer 2: Public Transport LINES",
       "data": {
-        "url": "data/public_transport_lines.json",
-        "format": {"type": "json", "property": "features"}
+        "url": "data/public_transport_lines.topojson",
+        "format": {"type": "topojson", "feature": "public_transport_lines"}
       },
       "mark": {
         "type": "geoshape",
@@ -75,24 +110,42 @@
     {
       "description": "Layer 3: Public Transport STOPS (Placed on top)",
       "data": {
-        "url": "data/public_transport_stops.geojson",
-        "format": {"type": "json", "property": "features"}
+        "url": "data/public_transport_stops.topojson",
+        "format": {"type": "topojson", "feature": "public_transport_stops"}
       },
       "transform": [
         {
           "filter": "datum.properties.MODE == 'METRO TRAIN' || datum.properties.ROUTE_TYPE == 2"
+        },
+        {
+          "calculate": "datum.geometry.coordinates[0]",
+          "as": "Longitude_Extracted"
+        },
+        {
+          "calculate": "datum.geometry.coordinates[1]",
+          "as": "Latitude_Extracted"
         }
       ],
       "mark": {
-        "type": "geoshape",
-        "fill": "#1f77b4", 
-        "stroke": "#ffffff", 
-        "strokeWidth": 0.3,
-        "size": 0.00002
+        "type": "circle",
+        "color": "#1900ff", 
+        "size": 35, 
+        "stroke": "#bcbfca",
+        "strokeWidth": 1,
+        "opacity": 1
       },
       "encoding": {
+        "longitude": {
+          "field": "Longitude_Extracted", 
+          "type": "quantitative"
+        },
+        "latitude": {
+          "field": "Latitude_Extracted", 
+          "type": "quantitative"
+        },
         "tooltip": [
-          {"field": "properties.STOP_NAME", "type": "nominal", "title": "Station/Stop"}
+          {"field": "properties.STOP_NAME", "type": "nominal", "title": "Station"},
+          {"field": "properties.MODE", "type": "nominal", "title": "Service Type"}
         ]
       }
     }

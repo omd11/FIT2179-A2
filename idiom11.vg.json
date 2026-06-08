@@ -1,0 +1,152 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": "container",
+  "height": 400, 
+  "autosize": {
+    "type": "fit-x",
+    "contains": "padding"
+  },
+
+  "data": {
+    "url": "data/unified_station_metrics.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "Pax_annual": "number",
+        "total_safe_bike_path_meters": "number"
+      }
+    }
+  },
+  "params": [
+    {
+      "name": "LineFilter",
+      "value": null,
+      "bind": {
+        "input": "select",
+        "options": [
+          null, "Alamein Line", "Belgrave Line", "Craigieburn Line", "Cranbourne Line",
+          "Flemington Line", "Frankston Line", "Glen Waverly Line", "Hurstbridge Line",
+          "Lilydale Line", "Mernda Line", "Pakenham Line", "Sandringham Line",
+          "Stony Point Line", "Sunbury Line", "Upfield Line", "Werribee Line", "Williamstown Line"
+        ],
+        "labels": [
+          "All Lines", "Alamein Line", "Belgrave Line", "Craigieburn Line", "Cranbourne Line",
+          "Flemington Line", "Frankston Line", "Glen Waverly Line", "Hurstbridge Line",
+          "Lilydale Line", "Mernda Line", "Pakenham Line", "Sandringham Line",
+          "Stony Point Line", "Sunbury Line", "Upfield Line", "Werribee Line", "Williamstown Line"
+        ],
+        "name": "Select Train Line: "
+      }
+    }
+  ],
+  "transform": [
+    {
+      "filter": "LineFilter == null || datum.Train_Line == LineFilter"
+    },
+    {
+      "window": [{"op": "row_number", "as": "dedup_id"}],
+      "groupby": ["Stop_name"]
+    },
+    {
+      "filter": "datum.dedup_id == 1"
+    },
+    {
+      "joinaggregate": [
+        {"op": "median", "field": "Pax_annual", "as": "median_pax"},
+        {"op": "median", "field": "total_safe_bike_path_meters", "as": "median_bike"}
+      ]
+    },
+    {
+      "calculate": "datum.Pax_annual >= datum.median_pax ? (datum.total_safe_bike_path_meters >= datum.median_bike ? 'Integrated Hubs' : 'Missed Opportunities') : (datum.total_safe_bike_path_meters >= datum.median_bike ? 'Local Leisure' : 'Transit Deserts')",
+      "as": "quadrant"
+    },
+    {
+      "window": [{"op": "rank", "as": "rank_pax"}],
+      "sort": [{"field": "Pax_annual", "order": "descending"}],
+      "groupby": ["quadrant"] 
+    }
+  ],
+  "layer": [
+    {
+      "mark": {
+        "type": "point",
+        "filled": true,
+        "size": 100,
+        "stroke": "white",
+        "strokeWidth": 0.5,
+        "opacity": 0.8
+      },
+      "encoding": {
+        "x": {
+          "field": "Pax_annual",
+          "type": "quantitative",
+          "scale": {"type": "symlog", "constant": 10000},
+          "title": "Annual Station Entries (Symlog Scale)",
+          "axis": {"format": ".2s"}
+        },
+        "y": {
+          "field": "total_safe_bike_path_meters",
+          "type": "quantitative",
+          "scale": {"type": "sqrt", "constant": 100},
+          "title": "Safe Bike Paths within 800m (Sqrt Scale)",
+          "axis": {"grid": false}
+        },
+        "color": {
+          "field": "quadrant",
+          "type": "nominal",
+          "scale": {
+            "domain": ["Integrated Hubs", "Local Leisure", "Transit Deserts", "Missed Opportunities"],
+            "range": ["#2ca02c", "#98df8a", "#d62728", "#ff7f0e"]
+          },
+          "legend": {
+            "title": "Station Classification",
+            "orient": "bottom",
+            "columns": 4,
+            "labelFontSize": 12
+          }
+        },
+        "tooltip": [
+          {"field": "Stop_name", "type": "nominal", "title": "Station"},
+          {"field": "Train_Line", "type": "nominal", "title": "Line Filter Applied"},
+          {"field": "Pax_annual", "type": "quantitative", "title": "Annual Entries", "format": ","},
+          {"field": "total_safe_bike_path_meters", "type": "quantitative", "title": "Safe Path Length (m)", "format": ",.0f"},
+          {"field": "quadrant", "type": "nominal", "title": "Status"}
+        ]
+      }
+    },
+    {
+      "mark": {"type": "rule", "color": "#888", "strokeDash": [5, 5]},
+      "encoding": {
+        "x": {"field": "median_pax", "type": "quantitative"}
+      }
+    },
+    {
+      "mark": {"type": "rule", "color": "#888", "strokeDash": [5, 5]},
+      "encoding": {
+        "y": {"field": "median_bike", "type": "quantitative"}
+      }
+    },
+    {
+      "transform": [
+        {"filter": "datum.quadrant == 'Missed Opportunities' && datum.rank_pax <= 3"}
+      ],
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 10,
+        "dy": -5,
+        "fontWeight": "bold",
+        "color": "#d95f02"
+      },
+      "encoding": {
+        "x": {"field": "Pax_annual", "type": "quantitative"},
+        "y": {"field": "total_safe_bike_path_meters", "type": "quantitative"},
+        "text": {"field": "Stop_name", "type": "nominal"}
+      }
+    }
+  ],
+  "config": {
+    "view": {"stroke": "transparent"},
+    "font": "Arial"
+  }
+}

@@ -1,110 +1,218 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "title": {
-    "text": "Idiom 9: Multi-Metric Station Profile",
-    "subtitle": "Parallel coordinates tracking volume criteria against active transport proximity",
-    "subtitleColor": "#666666",
-    "subtitleFontStyle": "italic"
-  },
-  "width": 600,
-  "height": 400,
+
   "background": "#f9f9f9",
-  "data": {
-    "url": "data/station_profiles.csv"
+  "spacing": 15,
+  "resolve": {
+    "scale": {"y": "shared"}
+    
   },
-  "params": [
+
+  "hconcat": [
     {
-      "name": "Line_Selector",
-      "value": "All",
-      "bind": {
-        "input": "select",
-        "options": [
-          "All",
-          "Alamein Line",
-          "Belgrave Line",
-          "Craigieburn Line",
-          "Cranbourne Line",
-          "Flemington Line",
-          "Frankston Line",
-          "Glen Waverly Line",
-          "Hurstbridge Line",
-          "Lilydale Line",
-          "Mernda Line",
-          "Pakenham Line",
-          "Sandringham Line",
-          "Stony Point Line",
-          "Sunbury Line",
-          "Upfield Line",
-          "Werribee Line",
-          "Williamstown Line"
-        ],
-        "name": "Select Train Line: "
-      }
+      "title": "2023",
+      "width": 500,
+      "height": 400,
+      "layer": [
+        {
+          "description": "2023 Train Layer",
+          "data": {
+            "url": "data/monthly_public_transport_patronage_by_mode.csv",
+            "format": {
+              "type": "csv",
+              "parse": {
+                "Year": "number",
+                "Month": "number",
+                "Metropolitan train": "number"
+              }
+            }
+          },
+          "transform": [
+            {"filter": "datum.Year == 2023"},
+            {"calculate": "datetime(2024, datum.Month - 1, 1)", "as": "Shared_Month"},
+            {"aggregate": [{"op": "mean", "field": "Metropolitan train", "as": "Raw_Volume"}], "groupby": ["Shared_Month"]},
+            {"joinaggregate": [{"op": "max", "field": "Raw_Volume", "as": "Max_Volume"}]},
+            {"calculate": "datum.Raw_Volume / datum.Max_Volume", "as": "Normalized_Volume"},
+            {"calculate": "'Metro Train'", "as": "Transport_Mode"}
+          ],
+          "mark": {
+            "type": "line",
+            "point": {"filled": true, "size": 60},
+            "strokeWidth": 3
+          },
+          "encoding": {
+            "x": {
+              "field": "Shared_Month",
+              "type": "temporal",
+              "timeUnit": "month",
+              "title": "Month",
+              "axis": {"format": "%b", "labelAngle": 0, "grid": false, "tickCount": 12}
+            },
+            "y": {
+              "field": "Normalized_Volume",
+              "type": "quantitative",
+              "title": "Relative Volume Retained (% of Peak Month)",
+              "axis": {"format": ".0%", "gridDash": [4, 4]},
+              "scale": {"domain": [0, 1.1]}
+            },
+            "color": {
+              "field": "Transport_Mode",
+              "type": "nominal",
+              "scale": {"domain": ["Metro Train", "Active Cycling"], "range": ["#1f77b4", "#2ca02c"]},
+              "legend": null
+            },
+            "tooltip": [
+              {"field": "Shared_Month", "type": "temporal", "timeUnit": "month", "title": "Month"},
+              {"field": "Transport_Mode", "type": "nominal", "title": "Mode"},
+              {"field": "Normalized_Volume", "type": "quantitative", "title": "Volume Retained", "format": ".1%"}
+            ]
+          }
+        },
+        {
+          "description": "2023 Bike Layer",
+          "data": {
+            "url": "data/black_rock_daily_volume.csv"
+          },
+          "transform": [
+            {"filter": "year(toDate(datum.Date)) == 2023"},
+            {"calculate": "datetime(2024, month(toDate(datum.Date)), 1)", "as": "Shared_Month"},
+            {"aggregate": [{"op": "mean", "field": "Total_Network_Volume", "as": "Raw_Volume"}], "groupby": ["Shared_Month"]},
+            {"joinaggregate": [{"op": "max", "field": "Raw_Volume", "as": "Max_Volume"}]},
+            {"calculate": "datum.Raw_Volume / datum.Max_Volume", "as": "Normalized_Volume"},
+            {"calculate": "'Active Cycling'", "as": "Transport_Mode"}
+          ],
+          "mark": {
+            "type": "line",
+            "point": {"filled": true, "size": 60},
+            "strokeWidth": 3
+          },
+          "encoding": {
+            "x": {
+              "field": "Shared_Month",
+              "type": "temporal",
+              "timeUnit": "month"
+            },
+            "y": {
+              "field": "Normalized_Volume",
+              "type": "quantitative"
+            },
+            "color": {
+              "field": "Transport_Mode",
+              "type": "nominal",
+              "legend": null
+            },
+            "tooltip": [
+              {"field": "Shared_Month", "type": "temporal", "timeUnit": "month", "title": "Month"},
+              {"field": "Transport_Mode", "type": "nominal", "title": "Mode"},
+              {"field": "Normalized_Volume", "type": "quantitative", "title": "Volume Retained", "format": ".1%"}
+            ]
+          }
+        }
+      ]
     },
     {
-      "name": "hover",
-      "select": {
-        "type": "point",
-        "on": "pointerover",
-        "clear": "pointerout"
-      }
+      "title": "2024",
+      "width": 500,
+      "height": 400,
+      "layer": [
+        {
+          "description": "2024 Train Layer",
+          "data": {
+            "url": "data/monthly_public_transport_patronage_by_mode.csv",
+            "format": {
+              "type": "csv",
+              "parse": {
+                "Year": "number",
+                "Month": "number",
+                "Metropolitan train": "number"
+              }
+            }
+          },
+          "transform": [
+            {"filter": "datum.Year == 2024"},
+            {"calculate": "datetime(2024, datum.Month - 1, 1)", "as": "Shared_Month"},
+            {"aggregate": [{"op": "mean", "field": "Metropolitan train", "as": "Raw_Volume"}], "groupby": ["Shared_Month"]},
+            {"joinaggregate": [{"op": "max", "field": "Raw_Volume", "as": "Max_Volume"}]},
+            {"calculate": "datum.Raw_Volume / datum.Max_Volume", "as": "Normalized_Volume"},
+            {"calculate": "'Metro Train'", "as": "Transport_Mode"}
+          ],
+          "mark": {
+            "type": "line",
+            "point": {"filled": true, "size": 60},
+            "strokeWidth": 3
+          },
+          "encoding": {
+            "x": {
+              "field": "Shared_Month",
+              "type": "temporal",
+              "timeUnit": "month",
+              "title": "Month",
+              "axis": {"format": "%b", "labelAngle": 0, "grid": false, "tickCount": 12}
+            },
+            "y": {
+              "field": "Normalized_Volume",
+              "type": "quantitative"
+            },
+            "color": {
+              "field": "Transport_Mode",
+              "type": "nominal",
+              "scale": {"domain": ["Metro Train", "Active Cycling"], "range": ["#1f77b4", "#2ca02c"]},
+              "title": "Transport Mode",
+              "legend": {
+                "orient": "top-right",
+                "fillColor": "#ffffff",
+                "padding": 8,
+                "cornerRadius": 5,
+                "strokeColor": "#dddddd"
+              }
+            },
+            "tooltip": [
+              {"field": "Shared_Month", "type": "temporal", "timeUnit": "month", "title": "Month"},
+              {"field": "Transport_Mode", "type": "nominal", "title": "Mode"},
+              {"field": "Normalized_Volume", "type": "quantitative", "title": "Volume Retained", "format": ".1%"}
+            ]
+          }
+        },
+        {
+          "description": "2024 Bike Layer",
+          "data": {
+            "url": "data/black_rock_daily_volume.csv"
+          },
+          "transform": [
+            {"filter": "year(toDate(datum.Date)) == 2024"},
+            {"calculate": "datetime(2024, month(toDate(datum.Date)), 1)", "as": "Shared_Month"},
+            {"aggregate": [{"op": "mean", "field": "Total_Network_Volume", "as": "Raw_Volume"}], "groupby": ["Shared_Month"]},
+            {"joinaggregate": [{"op": "max", "field": "Raw_Volume", "as": "Max_Volume"}]},
+            {"calculate": "datum.Raw_Volume / datum.Max_Volume", "as": "Normalized_Volume"},
+            {"calculate": "'Active Cycling'", "as": "Transport_Mode"}
+          ],
+          "mark": {
+            "type": "line",
+            "point": {"filled": true, "size": 60},
+            "strokeWidth": 3
+          },
+          "encoding": {
+            "x": {
+              "field": "Shared_Month",
+              "type": "temporal",
+              "timeUnit": "month"
+            },
+            "y": {
+              "field": "Normalized_Volume",
+              "type": "quantitative"
+            },
+            "color": {
+              "field": "Transport_Mode",
+              "type": "nominal"
+            },
+            "tooltip": [
+              {"field": "Shared_Month", "type": "temporal", "timeUnit": "month", "title": "Month"},
+              {"field": "Transport_Mode", "type": "nominal", "title": "Mode"},
+              {"field": "Normalized_Volume", "type": "quantitative", "title": "Volume Retained", "format": ".1%"}
+            ]
+          }
+        }
+      ]
     }
-  ],
-  "transform": [
-    {
-      "filter": "Line_Selector == 'All' || datum.Train_Line == Line_Selector"
-    },
-    {
-      "fold": ["Pax_annual_norm", "Pax_AM_peak_norm", "Bike_Path_Dist_m_norm"],
-      "as": ["Metric_Type", "Normalized_Score"]
-    },
-    {
-      "calculate": "datum.Metric_Type == 'Pax_annual_norm' ? '1. Annual Volume' : datum.Metric_Type == 'Pax_AM_peak_norm' ? '2. AM Peak Volume' : '3. Distance to Bike Path'",
-      "as": "Axis_Label"
-    }
-  ],
-  "mark": {
-    "type": "line",
-    "point": {"filled": true, "size": 40},
-    "strokeWidth": 2
-  },
-  "encoding": {
-    "x": {
-      "field": "Axis_Label",
-      "type": "nominal",
-      "title": "Evaluation Criteria",
-      "axis": {"labelAngle": 0, "labelFontSize": 12, "labelPadding": 10}
-    },
-    "y": {
-      "field": "Normalized_Score",
-      "type": "quantitative",
-      "title": "Normalized Score (Low to High)",
-      "axis": {"grid": true, "labels": false, "ticks": false} 
-    },
-    "color": {
-      "field": "Train_Line",
-      "type": "nominal",
-      "scale": {"scheme": "category10"},
-      "title": "Train Line"
-    },
-    "detail": {
-      "field": "Stop_name",
-      "type": "nominal"
-    },
-    "opacity": {
-      "condition": {
-        "param": "hover",
-        "empty": false,
-        "value": 1
-      },
-      "value": 0.2
-    },
-    "tooltip": [
-      {"field": "Stop_name", "type": "nominal", "title": "Station"},
-      {"field": "Train_Line", "type": "nominal", "title": "Line"},
-      {"field": "Pax_annual", "type": "quantitative", "title": "Annual Patronage", "format": ","},
-      {"field": "Pax_AM_peak", "type": "quantitative", "title": "AM Peak Entries", "format": ","},
-      {"field": "Bike_Path_Dist_m", "type": "quantitative", "title": "Distance to Cycle Path (m)", "format": ".1f"}
-    ]
-  }
+  ]
 }

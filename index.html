@@ -11,8 +11,10 @@
     <style>
         /* Typography and Color Palette */
         :root {
-            --rail-blue: #005A9C;
-            --bike-green: #2E8B57;
+            --rail-blue: #1f77b4;
+            --bike-safe-green: #2ca02c;
+            --bike-unsafe: #ff7f0e;
+            --station-blue: #1900ff;
             --text-main: #333333;
             --text-light: #666666;
             --bg-page: #FAFAFA;
@@ -72,37 +74,58 @@
         .text-bike { color: var(--bike-green); font-weight: bold; }
 
         /* Chart Container Styling */
+        /* Target the immediate column divs inside the grid to pass down flex height */
+        .pure-g > [class*="pure-u-"] {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Chart Container Styling */
         .viz-container {
             background-color: var(--bg-card);
             padding: 20px;
             margin: 10px;
             border-radius: 4px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            
+            /* Crucial additions for equal height stretching */
+            flex: 1; 
             display: flex;
             flex-direction: column;
-            align-items: center; 
             overflow-x: auto; 
         }
 
         .chart-title {
             font-size: 1.1rem;
             font-weight: bold;
-            margin-bottom: 15px;
+            margin-bottom: 4px; /* Reduced to sit closer to the subtitle */
             color: var(--text-main);
             align-self: flex-start;
         }
 
-        .vega-active {
-            width: 100%;
-            display: flex;
-            justify-content: center;
+        .chart-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-style: italic;
+            margin-bottom: 15px; /* Pushes the chart canvas down */
+            align-self: flex-start;
         }
 
-        /* Forces Vega canvases to scale down visually so they don't break the horizontal grid */
-        .vega-embed canvas {
-            max-width: 100%;
-            height: auto !important;
+        /* Allow the chart container to swallow the remaining vertical space */
+        .vega-active {
+            width: 100%;
+            flex-grow: 1; 
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Keeps the chart vertically centered in the standardized card */
         }
+
+
+        .vega-embed {
+            width: 100%;
+        }
+
+
 
         .vega-placeholder {
             width: 100%;
@@ -128,6 +151,24 @@
             font-size: 0.9rem;
             color: var(--text-light);
         }
+
+        .chart-legend {
+            display: flex;
+            gap: 15px; /* Spaces the two legend items apart */
+            font-size: 0.85rem;
+            color: var(--text-main);
+            margin-bottom: 15px; /* Pushes the actual chart down */
+            align-self: flex-start;
+        }
+
+        .legend-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%; /* Makes it a circle */
+            margin-right: 6px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
@@ -141,41 +182,110 @@
     <section id="section-a">
         <h2>Section A: Melbourne's Transit Backbone at a Glance</h2>
         <div class="narrative-panel">
-            <p>Melbourne’s layout forces a choice for the green commuter: steel rails or two wheels? The map below reveals that while our rail layout spreads radially to connect the suburbs, the active cycling network relies heavily on disjointed trails. By finding the geometric intersection points, we can see exactly where multi-modal travel thrives—and where major transit stations completely lack safe, separated bike lanes.</p>
+            <p>Melbourne’s layout forces a choice for the green commuter: steel rails or two wheels? The map below reveals that while our rail layout spreads radially to connect the suburbs, the active cycling network relies heavily on disjointed trails. By finding the geometric intersection points, we can see exactly where multi-modal travel thrives and where major transit stations completely lack safe, separated bike lanes.</p>
         </div>
+
         
         <div class="pure-g">
             <div class="pure-u-1-2">
                 <div class="viz-container">
-                    <div class="chart-title">Idiom 1: Bimodal Infrastructure Hub Map</div>
+                    <div class="chart-title">Bimodal Infrastructure Map</div>
+                    <div class="chart-subtitle">Active cyling paths and train networks across Greater Melbourne</div>
+                    <div class="chart-legend">
+                        <span><span class="legend-dot" style="background-color: var(--bike-safe-green);"></span>Safe Bicycle Lanes</span>
+                        <span><span class="legend-dot" style="background-color: var(--bike-unsafe);"></span>Unsafe Bicycle Lanes</span>
+                        
+                        <span><span class="legend-dot" style="background-color: var(--rail-blue);"></span>Train Line</span>
+                        <span><span class="legend-dot" style="background-color: var(--station-blue);"></span>Train Station</span>
+                    </div>
                     <div class="vega-active" id="viz1"></div>
                 </div>
             </div>
             <div class="pure-u-1-2">
                 <div class="viz-container">
-                    <div class="chart-title">Idiom 2: Station Volume Grid</div>
+                    <div class="chart-title">Station Volume Grid</div>
+                    <div class="chart-subtitle">Annual station entry volume mapped via proportional symbol channels</div>
                     <div class="vega-active" id="viz2"></div>
                 </div>
             </div>
         </div>
+
+
+        <div class="pure-g" style="background-color: var(--bg-card); padding: 25px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin: 10px;">
+    
+    <div class="pure-u-1-2" style="padding-right: 20px; box-sizing: border-box;">
+        <h3 style="color: var(--bike-green); font-size: 1.2rem; margin-top: 0; display: flex; align-items: center; gap: 8px;">
+            <span>✅</span> Safe / Physically Separated
+        </h3>
+        <ul style="list-style-type: none; padding-left: 0; margin-bottom: 0;">
+            <li style="margin-bottom: 12px; font-size: 0.95rem;">
+                <strong style="color: var(--text-main);">Protected bike lane (on-road):</strong> 
+                <span style="color: var(--text-light);">Physically separated from vehicular traffic by bollards, curbs, or structural barriers.</span>
+            </li>
+            <li style="margin-bottom: 12px; font-size: 0.95rem;">
+                <strong style="color: var(--text-main);">Shared use path (off-road):</strong> 
+                <span style="color: var(--text-light);">Off-road path completely removed from motorized vehicle corridors, shared with pedestrians.</span>
+            </li>
+            <li style="margin-bottom: 12px; font-size: 0.95rem;">
+                <strong style="color: var(--text-main);">Separated path (off-road):</strong> 
+                <span style="color: var(--text-light);">Premium off-road infrastructure dedicated exclusively to bicycles, isolated from both cars and pedestrians.</span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="pure-u-1-2" style="padding-left: 20px; box-sizing: border-box; border-left: 1px solid #eaeaea;">
+        <h3 style="font-size: 1.2rem; margin-top: 0; display: flex; align-items: center; gap: 8px;">
+            <span>⚠️</span> Unsafe / Mixed Traffic
+        </h3>
+        <ul style="list-style-type: none; padding-left: 0; margin-bottom: 0;">
+            <li style="margin-bottom: 10px; font-size: 0.95rem;">
+                <strong style="color: var(--text-main);">Basic painted lane:</strong> 
+                <span style="color: var(--text-light);">Segregated by paint alone. Provides zero physical intrusion protection.</span>
+            </li>
+            <li style="margin-bottom: 10px; font-size: 0.95rem;">
+                <strong style="color: var(--text-main);">Buffered painted lane:</strong> 
+                <span style="color: var(--text-light);">Features an extra painted dead-zone strip, but still completely relies on driver compliance.</span>
+            </li>
+            <li style="margin-bottom: 10px; font-size: 0.95rem;">
+                <strong style="color: var(--text-main);">Shared bike/parking lane:</strong> 
+                <span style="color: var(--text-light);">Permits active car parking, introducing extreme risks of blind-side "dooring" accidents.</span>
+            </li>
+            <li style="margin-bottom: 10px; font-size: 0.95rem;">
+                <strong style="color: var(--text-main);">Intermittent/informal:</strong> 
+                <span style="color: var(--text-light);">Non-exclusive roadside pictograms shunted against the curb with broken lines.</span>
+            </li>
+            <li style="margin-bottom: 10px; font-size: 0.95rem;">
+                <strong style="color: var(--text-main);">Shared street (sharrows):</strong> 
+                <span style="color: var(--text-light);">Arrow symbols painted directly in center lanes, explicitly forcing riders to negotiate mixed heavy traffic.</span>
+            </li>
+        </ul>
+    </div>
+
+</div>
     </section>
 
     <section id="section-b">
         <h2>Section B: The Pulse of the Week: Workdays vs Weekends</h2>
         <div class="narrative-panel">
-            <p>Our networks don't sleep, but their usage changes completely. Linking train station entries across time bands with hourly bicycle counters visualizes the rhythmic pulse of Melbourne's week. Train usage spikes symmetrically into tight morning and evening peaks, whereas cycling volumes remain flatter. On weekends, rail patronage drops dramatically, while cycling volumes climb as Melburnians pivot from professional commuting to leisure.</p>
+            <p>While the rail network is defined by sharp, symmetrical commuter peaks, bicycle traffic pulses with a more consistent rhythm throughout the day. This difference in utility extends to the weekend, where cycling proves significantly more resilient by retaining nearly 70% of its weekday volume, compared to just 52% for the rail network.</p>
         </div>
 
         <div class="pure-g">
             <div class="pure-u-1-2">
                 <div class="viz-container">
-                    <div class="chart-title">Idiom 3: Peak Hour Patronage Waves</div>
+                    <div class="chart-title">Peak Hour Patronage Waves</div>
+                    <div class="chart-subtitle">Symmetric percentage distribution comparison of weekday train entries vs. cyclist volumes</div>
+                    <span><span class="legend-dot" style="background-color: var(--bike-safe-green);"></span>Bicycle</span>
+                    <span><span class="legend-dot" style="background-color: var(--rail-blue);"></span>Metro Train</span>
                     <div class="vega-active" id="viz3"></div>
                 </div>
             </div>
             <div class="pure-u-1-2">
                 <div class="viz-container">
-                    <div class="chart-title">Idiom 4: Active vs. Rail Commuter Shift</div>
+                    <div class="chart-title">Active vs. Rail Commuter Shift</div>
+                    <div class="chart-subtitle">Percentage of weekday commuter volume retained on weekends</div>
+                    <span><span class="legend-dot" style="background-color: var(--bike-safe-green);"></span>Bicycle</span>
+                    <span><span class="legend-dot" style="background-color: var(--rail-blue);"></span>Metro Train</span>
                     <div class="vega-active" id="viz4"></div>
                 </div>
             </div>
@@ -191,13 +301,17 @@
         <div class="pure-g">
             <div class="pure-u-1-2">
                 <div class="viz-container">
-                    <div class="chart-title">Idiom 5: Cycling Flow vs. Path Availability</div>
+                    <div class="chart-title">Cycling Flow vs. Path Availability</div>
+                    <div class="chart-subtitle">Evaluating if continuous, unbroken infrastructure triggers higher daily cycling adoption</div>
                     <div class="vega-active" id="viz5"></div>
                 </div>
             </div>
             <div class="pure-u-1-2">
                 <div class="viz-container">
-                    <div class="chart-title">Idiom 6: Commuter Rush Speed Ranges</div>
+                    <div class="chart-title">Commuter Rush Speed Ranges</div>
+                    <div class="chart-subtitle">Click any counter location on the map to filter and inspect its peak-hour speed distribution below</div>
+                    <span><span class="legend-dot" style="background-color: var(--bike-safe-green);"></span>Bicycle</span>
+                    <span><span class="legend-dot" style="background-color: var(--rail-blue);"></span>Metro Train</span>
                     <div class="vega-active" id="viz6"></div>
                 </div>
             </div>
@@ -213,31 +327,46 @@
         <div class="pure-g">
             <div class="pure-u-1-2">
                 <div class="viz-container">
-                    <div class="chart-title">Idiom 7: The Commuter Journey Destination Split</div>
+                    <div class="chart-title">The Commuter Journey Destination Split</div>
+                    <div class="chart-subtitle">AM Peak inbound network flow from outer regional sectors into central CBD Hubs</div>
                     <div class="vega-active" id="viz7"></div>
                 </div>
             </div>
             <div class="pure-u-1-2">
                 <div class="viz-container">
-                    <div class="chart-title">Idiom 8: Annual Cycling Reliability</div>
-                    <div class="vega-active" id="viz8">
-                    </div>
+                    <div class="chart-title">Annual Cycling Reliability</div>
+                    <div class="chart-subtitle">Daily active cycling volume across historical calendar years in the Bayside Black Rock Cycling Trail</div>
+                    <div class="vega-active" id="viz8"></div>
                 </div>
             </div>
         </div>
-    </section>
+
+        <div class="pure-g">
+            <div class="pure-u-1">
+                <div class="viz-container">
+                    <div class="chart-title">Seasonal Divergence: Active Transit vs. Rail (2023-2024)</div>
+                    <div class="chart-subtitle">Normalized year-over-year line chart comparing active transit weather drop-offs vs rail stability.</div>
+                    <span><span class="legend-dot" style="background-color: var(--bike-safe-green);"></span>Bicycle</span>
+                    <span><span class="legend-dot" style="background-color: var(--rail-blue);"></span>Metro Train</span>
+                    <div class="vega-active" id="viz9">
+                        
+                    </div>
+                </div>
+            </div>
+        </div> </section>
 
     <section id="section-e">
-        <h2>Section E: The Verdict: Evaluating Transit Health</h2>
+        <h2>Section E: The Last Mile Connection</h2>
         <div class="narrative-panel">
-            <p>How does your local line stack up? This final dashboard compares daily passenger load against local bike access and targets, showing where our infrastructure meets modern demands. While rail networks regularly hit their performance benchmarks, active cycling infrastructure outside the inner city still has ground to cover.</p>
+            <p>A green commute only works if you can safely get to the station. By comparing passenger volumes against bike lane proximity, we can see which high-traffic hubs are perfectly integrated, and which are glaring 'missed opportunities'.</p>
         </div>
 
         <div class="pure-g">
             <div class="pure-u-1-2">
                 <div class="viz-container">
-                    <div class="chart-title">Idiom 9: Multi-Metric Station Profile</div>
-                    <div class="vega-active" id="viz9">
+                    <div class="chart-title">Multi-Metric Station Profile</div>
+                    <div class="chart-subtitle">Globally normalized parallel coordinates with logarithmic scaling</div>
+                    <div class="vega-active" id="viz10">
                         [Vega-Lite Placeholder]<br>
                         Parallel Coordinates Plot scoring train lines across patronage, accessibility, and connectivity.
                     </div>
@@ -245,8 +374,9 @@
             </div>
             <div class="pure-u-1-2">
                 <div class="viz-container">
-                    <div class="chart-title">Idiom 10: Infrastructure Utilization Targets</div>
-                    <div class="vega-placeholder" id="viz10">
+                    <div class="chart-title">The Last Mile: Train Patronage vs. Safe Cycling Access</div>
+                    <div class="chart-subtitle">Comparing annual station entries against separated bike paths within an 800m radius.</div>
+                    <div class="vega-active" id="viz11">
                         [Vega-Lite Placeholder]<br>
                         Bullet Graph comparing current volumes against state planning targets.
                     </div>
@@ -256,8 +386,9 @@
     </section>
 
     <footer>
-        <p><strong>Author:</strong> Omid Fazli &nbsp;|&nbsp; <strong>Date:</strong> May 2026</p>
-        <p><strong>Data Sources:</strong> Department of Transport and Planning (DTP) - Public Transport Lines and Stops, Train Station Patronage, Bicycle Infrastructure Network, and Bicycle Volume Data.</p>
+        <p><strong>Author:</strong> Omid Fazli &nbsp;|&nbsp; <strong>Date:</strong> June 2026</p>
+        <p><strong>Data Sources:</strong> Department of Transport and Planning (DTP) - Public Transport Lines and Stops, Train Station Patronage, Bicycle Infrastructure Network, Bicycle Volume and Speed Data, DoT Bike Site Number Listing, and Monthly Public Transport Patronage by Mode.</p>
+        <p></p>Australian Bureau of Statistics - ASGS Volume 1 VIC SA3
         <p><small>Created for educational data visualization purposes.</small></p>
     </footer>
 
@@ -273,7 +404,7 @@
         theme: 'light'
     };
 
-    vegaEmbed('#viz1', 'idiom1.vg.json', embedConfig).catch(console.error);
+    vegaEmbed('#viz1', 'idiom1.vg.json', embedConfig,{renderer: 'canvas'}).catch(console.error);
     vegaEmbed('#viz2', 'idiom2.vg.json', embedConfig).catch(console.error);
     vegaEmbed('#viz3', 'idiom3.vg.json', embedConfig).catch(console.error);
     vegaEmbed('#viz4', 'idiom4.vg.json', embedConfig).catch(console.error);
@@ -282,6 +413,8 @@
     vegaEmbed('#viz7', 'idiom7.vg.json', embedConfig).catch(console.error);
     vegaEmbed('#viz8', 'idiom8.vg.json', embedConfig).catch(console.error);
     vegaEmbed('#viz9', 'idiom9.vg.json', embedConfig).catch(console.error);
+    vegaEmbed('#viz10', 'idiom10.vg.json', embedConfig).catch(console.error);
+    vegaEmbed('#viz11', 'idiom11.vg.json', embedConfig).catch(console.error);
 </script>
 
 </body>

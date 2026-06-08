@@ -1,70 +1,179 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "title": {
-    "text": "Idiom 6: Commuter Rush Speed Ranges",
-    "subtitle": "Distribution of bicycle speeds across top collection sites during peak hours",
-    "subtitleColor": "#666666",
-    "subtitleFontStyle": "italic"
-  },
-  "width": 700,
-  "height": 400,
+
   "background": "#f9f9f9",
-  "data": {
-    "url": "data/commuter_speeds_sampled.csv",
-    "format": {
-      "type": "csv",
-      "parse": {
-        "SPEED": "number"
+  "autosize": {
+    "type": "fit-x",
+    "contains": "padding"
+  },
+  "vconcat": [
+    {
+      "description": "TOP PANEL: Map view for spatial discovery and selection",
+      "width": "container", 
+      "height": 300, 
+      "projection": {
+        "type": "mercator",
+        "center": [144.99, -37.72],
+        "scale": 53000
+      },
+      "layer": [
+        {
+          "description": "Base Map Layer",
+          "data": {
+            "url": "data/SA3_2016_AUST.topojson",
+            "format": {"type": "topojson", "feature": "SA3_2016_AUST"}
+          },
+          "mark": {
+            "type": "geoshape",
+            "fill": "#eaeaea",
+            "stroke": "#ffffff",
+            "strokeWidth": 1
+          }
+        },
+        {
+          "description": "Layer 1: Bicycle Infrastructure Network (Base Network)",
+          "data": {
+            "url": "data/bicycle_infrastructure_network.topojson",
+            "format": {"type": "topojson", "feature": "bicycle_infrastructure_network"}
+          },
+          "mark": {
+            "type": "geoshape",
+            "stroke": "#2ca02c", 
+            "strokeWidth": 1.2,
+            "opacity": 0.5,
+            "fill": "transparent" 
+          },
+          "encoding": {
+            "tooltip": [
+              {"field": "properties.HwyType", "type": "nominal", "title": "Cycle Path"}
+            ]
+          }
+        },
+        {
+          "description": "Interactive Counter Points Layer",
+          "data": {
+            "url": "data/commuter_speeds_sampled.csv",
+            "format": {
+              "type": "csv",
+              "parse": {"SPEED": "number"}
+            }
+          },
+          "transform": [
+            {
+              "aggregate": [],
+              "groupby": ["SITE_XN_ROUTE"]
+            },
+            {
+              "lookup": "SITE_XN_ROUTE",
+              "from": {
+                "data": {"url": "data/counter_locations.csv"},
+                "key": "SITE_XN_ROUTE",
+                "fields": ["STRT_LAT", "STRT_LONG", "SITE_NAME"]
+              }
+            },
+            {
+              "filter": "isValid(datum.STRT_LAT) && isValid(datum.STRT_LONG)"
+            }
+          ],
+          "params": [
+            {
+              "name": "site_select",
+              "select": {
+                "type": "point", 
+                "fields": ["SITE_XN_ROUTE"]
+              }
+            }
+          ],
+          "mark": {
+            "type": "circle",
+            "stroke": "#333333",
+            "strokeWidth": 1
+          },
+          "encoding": {
+            "longitude": {"field": "STRT_LONG", "type": "quantitative"},
+            "latitude": {"field": "STRT_LAT", "type": "quantitative"},
+            "size": {
+              "condition": {"param": "site_select", "empty": false, "value": 250},
+              "value": 100
+            },
+            "color": {
+              "condition": {"param": "site_select", "empty": false, "value": "#e74c3c"},
+              "value": "#1f77b4"
+            },
+            "opacity": {
+              "condition": {"param": "site_select", "value": 1.0},
+              "value": 0.3
+            },
+            "tooltip": [
+              {"field": "SITE_NAME", "type": "nominal", "title": "Location"},
+              {"field": "SITE_XN_ROUTE", "type": "nominal", "title": "Site ID"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "description": "BOTTOM PANEL: Boxplot dynamically driven by top map selection",
+      "width": "container",
+      "height": 130,
+      "data": {
+        "url": "data/commuter_speeds_sampled.csv",
+        "format": {
+          "type": "csv",
+          "parse": {"SPEED": "number"}
+        }
+      },
+      "transform": [
+        {
+          "filter": {"param": "site_select"}
+        },
+        {
+          "lookup": "SITE_XN_ROUTE",
+          "from": {
+            "data": {"url": "data/counter_locations.csv"},
+            "key": "SITE_XN_ROUTE",
+            "fields": ["SITE_NAME"]
+          }
+        }
+      ],
+      "mark": {
+        "type": "boxplot",
+        "extent": "min-max",
+        "ticks": true,
+        "size": 40, 
+        "median": {"color": "white", "strokeWidth": 2},
+        "outliers": {"size": 8, "opacity": 0.2}
+      },
+      "encoding": {
+        "x": {
+          "field": "Time_Window",
+          "type": "nominal",
+          "title": "Peak Period",
+          "axis": {"labelAngle": 0, "labelFontSize": 12},
+          "scale": {"paddingOuter": 0.20} 
+        },
+        "y": {
+          "field": "SPEED",
+          "type": "quantitative",
+          "title": "Recorded Speed (km/h)",
+          "scale": {"zero": true},
+          "axis": {"grid": true}
+        },
+        "color": {
+          "field": "Time_Window",
+          "type": "nominal",
+          "scale": {
+            "domain": ["AM Peak", "PM Peak"],
+            "range": ["#1f77b4", "#ff7f0e"]
+          },
+          "legend": null
+        },
+        "tooltip": [
+          {"field": "SITE_NAME", "type": "nominal", "title": "Selected Location"},
+          {"field": "Time_Window", "type": "nominal", "title": "Window"},
+          {"field": "SPEED", "type": "quantitative", "title": "Speed (km/h)"}
+        ]
       }
     }
-  },
-  "mark": {
-    "type": "boxplot",
-    "extent": "min-max", 
-    "ticks": true,
-    "median": {"color": "white", "strokeWidth": 2},
-    "outliers": {"size": 10, "opacity": 0.2}
-  },
-  "encoding": {
-    "x": {
-      "field": "SITE_XN_ROUTE",
-      "type": "nominal",
-      "title": "Top Counter Locations (Site ID)",
-      "axis": {
-        "labelAngle": 0,
-        "labelFontSize": 12
-      }
-    },
-    "xOffset": {
-      "field": "Time_Window",
-      "type": "nominal"
-    },
-    "y": {
-      "field": "SPEED",
-      "type": "quantitative",
-      "title": "Recorded Speed (km/h)",
-      "scale": {"zero": true},
-      "axis": {"grid": true}
-    },
-    "color": {
-      "field": "Time_Window",
-      "type": "nominal",
-      "title": "Peak Period",
-      "scale": {
-        "domain": ["AM Peak", "PM Peak"],
-        "range": ["#1f77b4", "#ff7f0e"] 
-      },
-      "legend": {
-        "orient": "top-right",
-        "fillColor": "#ffffff",
-        "padding": 10,
-        "cornerRadius": 5,
-        "strokeColor": "#e0e0e0"
-      }
-    },
-    "tooltip": [
-      {"field": "SITE_XN_ROUTE", "type": "nominal", "title": "Site ID"},
-      {"field": "Time_Window", "type": "nominal", "title": "Peak Window"}
-    ]
-  }
+  ]
 }

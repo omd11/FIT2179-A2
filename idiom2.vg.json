@@ -2,14 +2,12 @@
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "description": "Train Station Entry Volume Grid",
   "background": "#f9f9f9",
-  "title": {
-    "text": "Idiom 2: Train Station Entry Volume Grid",
-    "subtitle": "Annual station entry volume mapped via proportional symbol channels",
-    "subtitleColor": "#666666",
-    "subtitleFontStyle": "italic"
+  "width": "container",
+  "height": 400, 
+  "autosize": {
+    "type": "fit-x",
+    "contains": "padding"
   },
-  "width": 500,
-  "height": 500,
   "projection": {
     "type": "mercator",
     "center": [145, -37.86],
@@ -31,13 +29,13 @@
     {
       "description": "Choropleth Reference Base Context for Symbols",
       "data": {
-        "url": "data/SA3_2016_AUST.json",
+        "url": "data/SA3_2016_AUST.topojson",
         "format": {"type": "topojson", "feature": "SA3_2016_AUST"}
       },
       "mark": {
         "type": "geoshape",
-        "fill": "#eaeaea",
-        "stroke": "#ffffff",
+        "fill": "#ddd",
+        "stroke": "#bcbfca",
         "strokeWidth": 0.5
       }
     },
@@ -95,7 +93,7 @@
             "rangeMax":5000,
             "clamp": true
           },
-          "title": "Peak Volume"
+          "title": "Peak Period Volume"
         },
         "tooltip": [
           {"field": "Stop_name", "type": "nominal", "title": "Station"},

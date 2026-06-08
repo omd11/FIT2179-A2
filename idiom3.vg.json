@@ -2,77 +2,147 @@
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "description": "Temporal Patronage and Commuter Mode Shift Dashboard",
   "background": "#f9f9f9",
-
-  "title": {
-    "text": "Melbourne Peak Hour Patronage Waves",
-    "subtitle": "Aggregated average weekday station entries distributed across time bands",
-    "subtitleColor": "#666666",
-    "subtitleFontStyle": "italic"
+  "width": "container",
+  "height": 400, 
+  "autosize": {
+    "type": "fit-x",
+    "contains": "padding"
   },
-  "width": 500,
-  "height": 400,
-  "data": {
-    "url": "data/annual_metropolitan_train_station_entries_fy_2024_2025.csv",
-    "format": {
-      "type": "csv",
-      "parse": {
-        "Pax_pre_AM_peak": "number",
-        "Pax_AM_peak": "number",
-        "Pax_interpeak": "number",
-        "Pax_PM_peak": "number",
-        "Pax_PM_late": "number"
-      }
-    }
-  },
-  "transform": [
+  
+  "layer": [
     {
-      "fold": [
-        "Pax_pre_AM_peak",
-        "Pax_AM_peak",
-        "Pax_interpeak",
-        "Pax_PM_peak",
-        "Pax_PM_late"
+      "description": "UPWARD LAYER: Metro Train Distribution Profile",
+      "data": {
+        "url": "data/annual_metropolitan_train_station_entries_fy_2024_2025.csv",
+        "format": {
+          "type": "csv",
+          "parse": {
+            "Pax_pre_AM_peak": "number",
+            "Pax_AM_peak": "number",
+            "Pax_interpeak": "number",
+            "Pax_PM_peak": "number",
+            "Pax_PM_late": "number"
+          }
+        }
+      },
+      "transform": [
+        {
+          "fold": [
+            "Pax_pre_AM_peak",
+            "Pax_AM_peak",
+            "Pax_interpeak",
+            "Pax_PM_peak",
+            "Pax_PM_late"
+          ],
+          "as": ["Raw_Band", "Raw_Volume"]
+        },
+        {
+          "calculate": "datum.Raw_Band == 'Pax_pre_AM_peak' ? '1. Pre-AM (12am-7am)' : datum.Raw_Band == 'Pax_AM_peak' ? '2. AM Peak (7am-9:30am)' : datum.Raw_Band == 'Pax_interpeak' ? '3. Interpeak (9:30am-3pm)' : datum.Raw_Band == 'Pax_PM_peak' ? '4. PM Peak (3pm-7pm)' : '5. PM Late (7pm-12am)'",
+          "as": "Time_Label"
+        },
+        {
+          "aggregate": [{"op": "sum", "field": "Raw_Volume", "as": "Band_Total_Volume"}],
+          "groupby": ["Time_Label"]
+        },
+        {
+          "joinaggregate": [{"op": "sum", "field": "Band_Total_Volume", "as": "Total_Network_Volume"}]
+        },
+        {
+          "calculate": "(datum.Band_Total_Volume / datum.Total_Network_Volume) * 100",
+          "as": "Percentage"
+        },
+        {
+          "calculate": "'Metro Train'",
+          "as": "Transport_Mode"
+        }
       ],
-      "as": ["Raw_Band", "Volume"]
+      "mark": {
+        "type": "bar",
+        "opacity": 0.85
+      },
+      "encoding": {
+        "x": {
+          "field": "Time_Label",
+          "type": "nominal",
+          "title": "Time of Day",
+          "axis": {
+            "labelAngle": -15,
+            "labelFontSize": 11,
+            "grid": true
+          }
+        },
+        "y": {
+          "field": "Percentage",
+          "type": "quantitative",
+          "title": "Share of Daily Commutes (%)",
+          "axis": {
+            "labelExpr": "abs(datum.value) + '%'",
+            "titlePadding": 10
+          }
+        },
+        "color": {
+          "field": "Transport_Mode",
+          "type": "nominal",
+          "title": "Transport Mode",
+          "scale": {
+            "domain": ["Metro Train", "Bicycle"],
+            "range": ["#1f77b4", "#2ca02c"]
+          },
+          "legend":null
+        },
+        "tooltip": [
+          {"field": "Transport_Mode", "type": "nominal", "title": "Transport Mode"},
+          {"field": "Time_Label", "type": "nominal", "title": "Time Period"},
+          {"field": "Percentage", "type": "quantitative", "title": "Distribution Share", "format": ".1f"}
+        ]
+      }
     },
     {
-      "calculate": "datum.Raw_Band == 'Pax_pre_AM_peak' ? '1. Pre-AM (12am-7am)' : datum.Raw_Band == 'Pax_AM_peak' ? '2. AM Peak (7am-9:30am)' : datum.Raw_Band == 'Pax_interpeak' ? '3. Interpeak (9:30am-3pm)' : datum.Raw_Band == 'Pax_PM_peak' ? '4. PM Peak (3pm-7pm)' : '5. PM Late (7pm-12am)'",
-      "as": "Time_Label"
+      "description": "DOWNWARD LAYER: Bicycle Distribution Profile",
+      "data": {
+        "url": "data/bicycle_time_bins.csv",
+        "format": {"type": "csv"}
+      },
+      "transform": [
+        {
+          "joinaggregate": [{"op": "sum", "field": "Volume", "as": "Total_Network_Volume"}]
+        },
+        {
+          "calculate": "-((datum.Volume / datum.Total_Network_Volume) * 100)",
+          "as": "Percentage"
+        },
+        {
+          "calculate": "abs(datum.Percentage)",
+          "as": "Display_Percentage"
+        },
+        {
+          "calculate": "'Bicycle'",
+          "as": "Transport_Mode"
+        }
+      ],
+      "mark": {
+        "type": "bar",
+        "opacity": 0.85
+      },
+      "encoding": {
+        "x": {
+          "field": "Time_Label",
+          "type": "nominal"
+        },
+        "y": {
+          "field": "Percentage",
+          "type": "quantitative"
+        },
+        "color": {
+          "field": "Transport_Mode",
+          "type": "nominal"
+        },
+        "tooltip": [
+          {"field": "Transport_Mode", "type": "nominal", "title": "Transport Mode"},
+          {"field": "Time_Label", "type": "nominal", "title": "Time Period"},
+          {"field": "Display_Percentage", "type": "quantitative", "title": "Distribution Share", "format": ".1f"}
+        ]
+      }
     }
-  ],
-  "mark": {
-    "type": "bar",
-    "interpolate": "monotone",
-    "line": {"color": "#1f77b4"}, 
-    "fill": "#1f77b4",       
-    "opacity": 0.6             
-  },
-  "encoding": {
-    "x": {
-      "field": "Time_Label",
-      "type": "nominal",
-      "title": "Time of Day",
-      "axis": {
-        "labelAngle": -15,
-        "labelOverlap": false,
-        "labelFontSize": 11
-      }
-    },
-    "y": {
-      "aggregate": "sum",
-      "field": "Volume",
-      "type": "quantitative",
-      "title": "Total Passenger Volume (Entries)",
-      "axis": {
-        "format": "s",
-        "titlePadding": 10
-      }
-    },
-    
-    "tooltip": [
-      {"field": "Time_Label", "type": "nominal", "title": "Time Period"},
-      {"aggregate": "sum", "field": "Volume", "type": "quantitative", "title": "Total Volume", "format": ","}
-    ]
-  }
-
+  ]
 }
